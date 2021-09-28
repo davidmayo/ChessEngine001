@@ -6,6 +6,7 @@ namespace ChessEngine001
     {
         static void Main(string[] args)
         {
+            // Make a change again
             Board board;
             board = new Board("--------/--------/----k---/--------/--------/--------/--------/--------");
 
