@@ -134,7 +134,118 @@ namespace ChessEngine001
             
         }
 
-        public string ToFenBoard()
+        public string ToFenString()
+        {
+            string fenString = "";
+
+            // Iterate over the rows
+            for ( int row = 7; row >= 0; row-- )
+            {
+                // Build a string for this row
+                // It will be of the form "-P--Q---"
+                string rowString = "";
+
+                for( int col = 0; col < 8; col++ )
+                {
+                    rowString += board[row, col].ToFenString();
+                }
+
+                // Convert from "-P--Q---" to "1P2Q3"
+                rowString = ConvertRowStringToFen(rowString);
+
+                // Append this rowString to the overall string
+                fenString += rowString;
+
+                // If this isn't the bottom row, add a /
+                if( row != 0)
+                {
+                    fenString += "/";
+                }
+            }
+
+            // Encode the side to play
+            fenString += (ColorToPlay == Color.White ? " w " : " b ");
+
+
+            // Encode castling rights
+            string castleString = "";
+            if (CanCastleKingsideWhite)
+                castleString += "K";
+            if (CanCastleQueensideWhite)
+                castleString += "Q";
+            if (CanCastleKingsideBlack)
+                castleString += "k";
+            if (CanCastleQueensideBlack)
+                castleString += "q";
+
+            // If no castling is possible, replace with "-"
+            if (castleString == "")
+                castleString = "-";
+
+            fenString += castleString;
+
+
+            // Encode the en passant target
+            if( EnPassantTarget is null)
+            {
+                fenString += " -";
+            }
+            else
+            {
+                fenString += " " + EnPassantTarget;
+            }
+
+            // Encode the halfmove clock
+            // NOT YET IMPLEMENTED
+            fenString += " 0";
+
+            // Encode the fullmove number
+            // NOT YET IMPLEMENTED
+            fenString += " 1";
+
+            return fenString;
+        }
+
+        // Convert a string like "-P--Q---" to a FEN-approved string like "1P2Q3"
+        private static string ConvertRowStringToFen(string rowString)
+        {
+            string rv = "";
+            for( int index = 0; index < rowString.Length; index++ )
+            {
+                char current = rowString[index];
+
+                // If it's not '-', then it's an actual piece and can be added to the FEN string
+                if( current != '-')
+                {
+                    rv += current;
+                }
+
+                
+                else
+                {
+                    // Otherwise, search until we find a non '-' char
+                    // And count the '-' we find
+                    int count = 1;
+                    for( int peekIndex = index+1; peekIndex < rowString.Length; peekIndex++)
+                    {
+                        if( rowString[peekIndex] == '-')
+                        {
+                            count++;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    index = index + count - 1;
+                    rv += string.Format("{0}", count);
+                }
+            }
+
+            return rv;
+        }
+
+        public string ToFancyString()
         {
             string rv = "";
 
@@ -179,6 +290,10 @@ namespace ChessEngine001
                 {
                     rv += "    Position count: " + "NOT IMPLEMENTED";
                 }
+                else if (row == 1)
+                {
+                    rv += "    FEN: " + ToFenString();
+                }
 
             }
             rv += "\n   +-------------------------------+";
@@ -189,7 +304,7 @@ namespace ChessEngine001
 
         public override string ToString()
         {
-            return ToFenBoard();
+            return ToFancyString();
         }
         private string GetCastlingString()
         {
@@ -232,7 +347,7 @@ namespace ChessEngine001
 
         public void PrintBoard()
         {
-            string boardString = ToFenBoard();
+            string boardString = ToFancyString();
             if (Console.CursorLeft != 0)
             {
                 Console.WriteLine();

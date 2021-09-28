@@ -108,7 +108,7 @@ namespace ChessEngine001
                     rv = "k";
                     break;
                 case Type.Empty:
-                    rv = " ";
+                    rv = "-";
                     break;
                 case Type.Unknown:
                     rv = "?";
