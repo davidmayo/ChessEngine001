@@ -13,6 +13,7 @@ namespace ChessEngine001
             board = new Board("rnb-k-nr/-pppp---/--------/--------/pbq-----/-P--Rppp/P-PPPPPP/RNBQKBN-");
             board = new Board("n-------/--------/--------/--------/--------/--------/--------/--------");
             board = new Board();
+            board = new Board("rnbqkbnr/pppppppp/--------/--------/-p-p----/--------/PPPPPPPP/RNBQKBNR");
             //board = new Board();
             //board.ColorToPlay = Color.Black;
             //Console.WriteLine("Hello World!");
@@ -40,30 +41,31 @@ namespace ChessEngine001
             board.PrintBoard();
             Console.WriteLine();
             Console.WriteLine();
-
-            Move move = new Move("e2","e4", board);
-
+            Move move;
+            
+            move = new Move("c2","c4", board);
             if( move.IsPseudoLegalPawnPush() )
                 board.MakeMove(move);
 
-            move = new Move("e7", "e5", board);
-            if(move.IsPseudoLegalPawnPush())
-                board.MakeMove(move);
-
-
-            //board.MakeMove(new Move("e1", "e2", board));
-            //board.MakeMove(new Move("e8", "e7", board));
-
-
             board.PrintBoard();
+            /*return;
 
+            move = new Move("e5", "d6", board);
+            if (move.IsPseudoLegalPawnEnPassantCapture())
+            {
+                Console.WriteLine("Valid!");
+                board.MakeMove(move);
+                board.PrintBoard();
 
-            //return;
-            Console.WriteLine(move.IsPseudoLegalRookMove());
+            }
+            else
+            {
+                Console.WriteLine("Not valid!");
+            }*/
+
 
             moves = new System.Collections.Generic.List<Move>();
 
-            return;
 
             for (int startIndex = 0; startIndex < 64; startIndex++)
             {
@@ -74,40 +76,11 @@ namespace ChessEngine001
 
                     Move mv = new Move(start, end, board);
 
-                    if (mv.IsPseudoLegalPawnCapture())
+                    if (mv.IsPseudoLegalPawnEnPassantCapture())
                     {
                         //moves.Add(mv);
-                        Console.WriteLine("Pseudo-legal pawn capture: {0}", mv);
-                    }
-                    if (mv.IsPseudoLegalPawnPush())
-                    {
-                        //moves.Add(mv);
-                        Console.WriteLine("Pseudo-legal pawn push: {0}", mv);
-                    }
-                    if (mv.IsPseudoLegalBishopMove())
-                    {
-                        //moves.Add(mv);
-                        Console.WriteLine("Pseudo-legal bishop move: {0}", mv);
-                    }
-                    if (mv.IsPseudoLegalRookMove())
-                    {
-                        //moves.Add(mv);
-                        Console.WriteLine("Pseudo-legal rook move: {0}", mv);
-                    }
-                    if (mv.IsPseudoLegalQueenMove())
-                    {
-                        //moves.Add(mv);
-                        Console.WriteLine("Pseudo-legal queen move: {0}", mv);
-                    }
-                    if (mv.IsPseudoLegalKingMove())
-                    {
-                        //moves.Add(mv);
-                        Console.WriteLine("Pseudo-legal king move: {0}", mv);
-                    }
-                    if (mv.IsPseudoLegalKnightMove())
-                    {
-                        //moves.Add(mv);
-                        Console.WriteLine("Pseudo-legal knight move: {0}", mv);
+                        Console.WriteLine("Pseudo-legal en passant capture: {0}", mv);
+
                     }
                 }
             }

@@ -76,6 +76,10 @@ namespace ChessEngine001
 
         public bool Equals([AllowNull] Coord other)
         {
+            if( other is null )
+            {
+                return false;
+            }
             return this.Index == other.Index;
         }
 

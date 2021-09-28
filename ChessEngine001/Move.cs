@@ -40,10 +40,47 @@ namespace ChessEngine001
             this.Piece = this.board[StartSquare];
         }
 
+        public bool IsPseudoLegalMove()
+        {
+            if( Piece.Type == Type.Empty)
+            {
+                return false;
+            }
+            if( Piece.Color != board.ColorToPlay )
+            {
+                return false;
+            }
+
+            if( Piece.Type == Type.King )
+            {
+                return IsPseudoLegalKingMove();
+            }
+            else if( Piece.Type == Type.Queen)
+            {
+                return IsPseudoLegalQueenMove();
+            }
+            else if (Piece.Type == Type.Rook)
+            {
+                return IsPseudoLegalRookMove();
+            }
+            else if (Piece.Type == Type.Bishop)
+            {
+                return IsPseudoLegalBishopMove();
+            }
+            else if (Piece.Type == Type.Knight)
+            {
+                return IsPseudoLegalKnightMove();
+            }
+            else if (Piece.Type == Type.Pawn)
+            {
+                return IsPseudoLegalPawnMove();
+            }
+            return false;
+        }
+
         private bool IsPseudoLegalPawnMove()
         {
             return IsPseudoLegalPawnCapture() || IsPseudoLegalPawnPush();
-
         }
 
         public bool IsPseudoLegalPawnCapture()
@@ -130,10 +167,66 @@ namespace ChessEngine001
             //throw new NotImplementedException();
         }
 
-        private bool IsPseudoLegalPawnEnPassantCapture()
+        public bool IsPseudoLegalPawnEnPassantCapture()
         {
-            //TODO
-            return false;
+            // Make sure Start is a pawn of the right color
+            if( Piece.Type != Type.Pawn || Piece.Color != board.ColorToPlay)
+            {
+                //Console.WriteLine("DEBUG: bad type or color");
+                return false;
+            }
+            else
+            {
+                //Console.WriteLine("DEBUG: good type and color");
+            }
+
+            // Make sure EnPassantTarget is not null
+            if ( board.EnPassantTarget is null )
+            {
+                //Console.WriteLine("DEBUG: EnPassantTarget is null");
+                return false;
+            }
+            else
+            {
+                //Console.WriteLine("DEBUG: EnPassantTarget exists");
+            }
+
+
+            // Make sure that End == EnPassantTarget
+            if ( EndSquare != board.EnPassantTarget)
+            {
+                //Console.WriteLine("DEBUG: BAD: EndSquare not equal EnPassantTarget");
+                //Console.WriteLine("DEBUG: EndSquare={0}   EnPassantTarget={1}",EndSquare,board.EnPassantTarget);
+
+                return false;
+            }
+            else
+            {
+                //Console.WriteLine("DEBUG: GOOD: EndSquare equal EnPassantTarget");
+                //Console.WriteLine("DEBUG: EndSquare={0}   EnPassantTarget={1}", EndSquare, board.EnPassantTarget);
+
+            }
+
+
+            // Make sure that Start is the valid row
+            int validStartRow = Piece.Color == Color.White ? 4 : 3;
+            //Console.WriteLine("DEBUG: validStartRow=" + validStartRow);
+            //Console.WriteLine("DEBUG: StartSquare.Row=" + StartSquare.Row);
+
+            if ( StartSquare.Row != validStartRow )
+            {
+                return false;
+            }
+
+            // Make sure that EnPassantTarget is exactly one column offset from Start
+            if( (board.EnPassantTarget.Col - StartSquare.Col != 1) &&
+                (board.EnPassantTarget.Col - StartSquare.Col != -1))
+            {
+                return false;
+            }
+
+            // If we got here, it's valid
+            return true;
             throw new NotImplementedException();
         }
 
@@ -291,7 +384,7 @@ namespace ChessEngine001
                     //Console.WriteLine("GOOD: MOVE IS PSEUDOLEGAL.");
 
                     // Set en passant target
-                    enPassantTarget = EndSquare;
+                    enPassantTarget = midPoint;
                     return true;
                 }
                 else
