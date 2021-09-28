@@ -11,10 +11,10 @@ namespace ChessEngine001
             board = new Board("--------/--------/----k---/--------/--------/--------/--------/--------");
 
             board = new Board("rnb-k-nr/-pppp---/--------/--------/pbq-----/-P--Rppp/P-PPPPPP/RNBQKBN-");
-            board = new Board("n-------/--------/--------/--------/--------/--------/--------/--------");
-            board = new Board();
-            board = new Board("rnbqkbnr/pppppppp/--------/--------/-p-p----/--------/PPPPPPPP/RNBQKBNR");
-            board = new Board("r---k--r/pppppppp/--------/--------/--------/--------/PPPPPPPP/R---K--R");
+            //board = new Board("n-------/--------/--------/--------/--------/--------/--------/--------");
+            //board = new Board();
+            //board = new Board("rnbqkbnr/pppppppp/--------/--------/-p-p----/--------/PPPPPPPP/RNBQKBNR");
+            //board = new Board("r---k--r/pppppppp/--------/--------/--------/--------/PPPPPPPP/R---K--R");
 
             //board = new Board();
             //board.ColorToPlay = Color.Black;
@@ -45,8 +45,9 @@ namespace ChessEngine001
             Console.WriteLine();
             Move move;
 
+
             //board.ColorToPlay = Color.Black;
-            move = new Move("E8", "G8", board);
+            /*move = new Move("E8", "G8", board);
             if( move.IsPseudoLegalCastleMove())
             {
                 Console.WriteLine("Legal!");
@@ -55,7 +56,7 @@ namespace ChessEngine001
             {
                 Console.WriteLine("ILLEGAL!");
 
-            }
+            }*/
 
 
             moves = new System.Collections.Generic.List<Move>();
@@ -70,10 +71,10 @@ namespace ChessEngine001
 
                     Move mv = new Move(start, end, board);
 
-                    if (mv.IsPseudoLegalCastleMove())
+                    if (mv.IsPseudoLegalMove())
                     {
                         //moves.Add(mv);
-                        Console.WriteLine("Pseudo-legal castle: {0}", mv);
+                        Console.WriteLine("Pseudo-legal move: {0}", mv.MoveString);
                     }
                 }
             }

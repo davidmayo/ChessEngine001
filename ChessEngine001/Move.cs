@@ -11,8 +11,11 @@ namespace ChessEngine001
         public Coord EndSquare { get; }
         public Piece Piece { get; }
         public Coord EnPassantTarget { get => enPassantTarget; }
+        public string MoveString { get => moveString; set => moveString = value; }
 
+        
         private Coord enPassantTarget;
+        private string moveString;
 
         public bool IsCapture()
         {
@@ -44,38 +47,115 @@ namespace ChessEngine001
         {
             if( Piece.Type == Type.Empty)
             {
+                moveString = string.Format("[{0}-{1}] Illegal move: {0} unoccupied",StartSquare,EndSquare);
                 return false;
             }
             if( Piece.Color != board.ColorToPlay )
             {
+                moveString = string.Format("[{0}-{1}] Illegal move: {0} wrong color", StartSquare, EndSquare);
                 return false;
             }
 
-            if( Piece.Type == Type.King )
+            if (Piece.Type == Type.King)
             {
-                return IsPseudoLegalKingMove();
+                if (IsPseudoLegalCastleMove())
+                {
+                    moveString = string.Format("[{0}-{1}] Castle", StartSquare, EndSquare);
+                    return true;
+                }
+                else if (IsPseudoLegalKingMove())
+                {
+                    moveString = string.Format("[{0}-{1}] King move", StartSquare, EndSquare);
+                    return true;
+                }
+                else
+                {
+                    moveString = string.Format("[{0}-{1}] Illegal king move", StartSquare, EndSquare);
+                    return false;
+                }
             }
-            else if( Piece.Type == Type.Queen)
+
+            else if (Piece.Type == Type.Queen)
             {
-                return IsPseudoLegalQueenMove();
+                if (IsPseudoLegalQueenMove())
+                {
+                    moveString = string.Format("[{0}-{1}] Queen move", StartSquare, EndSquare);
+                    return true;
+                }
+                else
+                {
+                    moveString = string.Format("[{0}-{1}] Illegal queen move", StartSquare, EndSquare);
+                    return false;
+                }
             }
             else if (Piece.Type == Type.Rook)
             {
-                return IsPseudoLegalRookMove();
+                if (IsPseudoLegalRookMove())
+                {
+                    moveString = string.Format("[{0}-{1}] Rook move", StartSquare, EndSquare);
+                    return true;
+                }
+                else
+                {
+                    moveString = string.Format("[{0}-{1}] Illegal rook move", StartSquare, EndSquare);
+                    return false;
+                }
             }
             else if (Piece.Type == Type.Bishop)
             {
-                return IsPseudoLegalBishopMove();
+                if (IsPseudoLegalBishopMove())
+                {
+                    moveString = string.Format("[{0}-{1}] Bishop move", StartSquare, EndSquare);
+                    return true;
+                }
+                else
+                {
+                    moveString = string.Format("[{0}-{1}] Illegal bishop move", StartSquare, EndSquare);
+                    return false;
+                }
             }
             else if (Piece.Type == Type.Knight)
             {
-                return IsPseudoLegalKnightMove();
+                if (IsPseudoLegalKnightMove())
+                {
+                    moveString = string.Format("[{0}-{1}] Knight move", StartSquare, EndSquare);
+                    return true;
+                }
+                else
+                {
+                    moveString = string.Format("[{0}-{1}] Illegal Knight move", StartSquare, EndSquare);
+                    return false;
+                }
             }
             else if (Piece.Type == Type.Pawn)
             {
-                return IsPseudoLegalPawnMove();
+                if (IsPseudoLegalPawnEnPassantCapture())
+                {
+                    moveString = string.Format("[{0}-{1}] Pawn capture (en passant)", StartSquare, EndSquare);
+                    return true;
+                }
+                else if (IsPseudoLegalPawnCapture())
+                {
+                    moveString = string.Format("[{0}-{1}] Pawn capture", StartSquare, EndSquare);
+                    return true;
+                }
+                else if (IsPseudoLegalPawnPush())
+                {
+                    moveString = string.Format("[{0}-{1}] Pawn push", StartSquare, EndSquare);
+                    return true;
+                }
+                else
+                {
+                    moveString = string.Format("[{0}-{1}] Illegal pawn move", StartSquare, EndSquare);
+                    return false;
+                }
             }
-            return false;
+            else
+            {
+                // This should be unreachable code
+                moveString = string.Format("[{0}-{1}] Illegal move", StartSquare, EndSquare);
+                return false;
+            }
         }
 
         private bool IsPseudoLegalPawnMove()
@@ -83,7 +163,7 @@ namespace ChessEngine001
             return IsPseudoLegalPawnCapture() || IsPseudoLegalPawnPush();
         }
 
-        public bool IsPseudoLegalPawnCapture()
+        private bool IsPseudoLegalPawnCapture()
         {
             // En passant
             if( IsPseudoLegalPawnEnPassantCapture() )
@@ -167,7 +247,7 @@ namespace ChessEngine001
             //throw new NotImplementedException();
         }
 
-        public bool IsPseudoLegalPawnEnPassantCapture()
+        private bool IsPseudoLegalPawnEnPassantCapture()
         {
             // Make sure Start is a pawn of the right color
             if( Piece.Type != Type.Pawn || Piece.Color != board.ColorToPlay)
@@ -230,7 +310,7 @@ namespace ChessEngine001
             throw new NotImplementedException();
         }
 
-        public bool IsPseudoLegalKnightMove()
+        private bool IsPseudoLegalKnightMove()
         {
             // Piece is a pawn
             if (board[StartSquare].Type != Type.Knight)
@@ -274,7 +354,7 @@ namespace ChessEngine001
             }
         }
 
-        public bool IsPseudoLegalCastleMove()
+        private bool IsPseudoLegalCastleMove()
         {
             // Start square must be a king and must be correct color
             if (board[StartSquare].Type != Type.King || board[StartSquare].Color != board.ColorToPlay)
@@ -377,7 +457,7 @@ namespace ChessEngine001
             throw new NotImplementedException();
         }
 
-        public bool IsPseudoLegalPawnPush()
+        private bool IsPseudoLegalPawnPush()
         {
             if (board[StartSquare].Type != Type.Pawn)
             {
@@ -503,22 +583,22 @@ namespace ChessEngine001
 
         }
 
-        public bool IsPseudoLegalBishopMove()
+        private bool IsPseudoLegalBishopMove()
         {
             return IsPseduoLegalLongDistanceMove(Type.Bishop);
         }
 
-        public bool IsPseudoLegalRookMove()
+        private bool IsPseudoLegalRookMove()
         {
             return IsPseduoLegalLongDistanceMove(Type.Rook);
         }
 
-        public bool IsPseudoLegalQueenMove()
+        private bool IsPseudoLegalQueenMove()
         {
             return IsPseduoLegalLongDistanceMove(Type.Queen);
         }
 
-        public bool IsPseudoLegalKingMove()
+        private bool IsPseudoLegalKingMove()
         {
             return IsPseudoLegalCastleMove() || IsPseduoLegalLongDistanceMove(Type.King);
         }
