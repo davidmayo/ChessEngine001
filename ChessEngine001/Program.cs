@@ -14,6 +14,8 @@ namespace ChessEngine001
             board = new Board("n-------/--------/--------/--------/--------/--------/--------/--------");
             board = new Board();
             board = new Board("rnbqkbnr/pppppppp/--------/--------/-p-p----/--------/PPPPPPPP/RNBQKBNR");
+            board = new Board("r---k--r/pppppppp/--------/--------/--------/--------/PPPPPPPP/R---K--R");
+
             //board = new Board();
             //board.ColorToPlay = Color.Black;
             //Console.WriteLine("Hello World!");
@@ -42,26 +44,18 @@ namespace ChessEngine001
             Console.WriteLine();
             Console.WriteLine();
             Move move;
-            
-            move = new Move("c2","c4", board);
-            if( move.IsPseudoLegalPawnPush() )
-                board.MakeMove(move);
 
-            board.PrintBoard();
-            /*return;
-
-            move = new Move("e5", "d6", board);
-            if (move.IsPseudoLegalPawnEnPassantCapture())
+            //board.ColorToPlay = Color.Black;
+            move = new Move("E8", "G8", board);
+            if( move.IsPseudoLegalCastleMove())
             {
-                Console.WriteLine("Valid!");
-                board.MakeMove(move);
-                board.PrintBoard();
-
+                Console.WriteLine("Legal!");
             }
             else
             {
-                Console.WriteLine("Not valid!");
-            }*/
+                Console.WriteLine("ILLEGAL!");
+
+            }
 
 
             moves = new System.Collections.Generic.List<Move>();
@@ -76,11 +70,10 @@ namespace ChessEngine001
 
                     Move mv = new Move(start, end, board);
 
-                    if (mv.IsPseudoLegalPawnEnPassantCapture())
+                    if (mv.IsPseudoLegalCastleMove())
                     {
                         //moves.Add(mv);
-                        Console.WriteLine("Pseudo-legal en passant capture: {0}", mv);
-
+                        Console.WriteLine("Pseudo-legal castle: {0}", mv);
                     }
                 }
             }

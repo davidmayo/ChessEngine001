@@ -276,7 +276,103 @@ namespace ChessEngine001
 
         public bool IsPseudoLegalCastleMove()
         {
+            // Start square must be a king and must be correct color
+            if (board[StartSquare].Type != Type.King || board[StartSquare].Color != board.ColorToPlay)
+            {
+                return false;
+            }
+
+            // Make sure START and END are on same row
+            if (StartSquare.Row != EndSquare.Row)
+                return false;
+
+            // Make sure START is rank 1 or rank 8
+            if (StartSquare.Row != 0 && StartSquare.Row != 7)
+            {
+                return false;
+            }
+
+            // Make sure START is on E file
+            if (StartSquare.Col != 4)
+                return false;
+
+            // Make sure END is on C or G file
+            if (EndSquare.Col != 2 && EndSquare.Col != 6)
+                return false;
+
+            // Determine if it's queenside
+            bool isQueenside;
+            if (EndSquare.Col == 2)
+                isQueenside = true;
+            else
+                isQueenside = false;
+
+            // Determine color
+            bool isWhite;
+            int row;
+            if (EndSquare.Row == 0)
+            {
+                row = 0;
+                isWhite = true;
+            }
+            else
+            {
+                row = 7;
+                isWhite = false;
+            }
+
+            // Make sure castling in the given direction is possible
+            if (isQueenside && isWhite && !board.CanCastleQueensideWhite)
+                return false;
+            if (isQueenside && !isWhite && !board.CanCastleQueensideBlack)
+                return false;
+            if (!isQueenside && isWhite && !board.CanCastleKingsideWhite)
+                return false;
+            if (!isQueenside && !isWhite && !board.CanCastleKingsideBlack)
+                return false;
+
+            // Make arrays of columns to check for being unoccupied and not in check
+            int[] columnsNotOccupied;
+            int[] columnsNotInCheck;
+            if( isQueenside )
+            {
+                columnsNotOccupied = new int[] { 1,2,3 };
+                columnsNotInCheck = new int[] { 2,3,4 };
+            }
+            else
+            {
+                columnsNotOccupied = new int[] { 5, 6 };
+                columnsNotInCheck = new int[] { 4,5,6 };
+            }
+
+            // Make sure all the squares in columnsNotInCheck are not in check
+            foreach( int column in columnsNotInCheck)
+            {
+                Coord coord = new Coord(row, column);
+                if( IsAttacked(coord) )
+                {
+                    return false;
+                }
+            }
+
+            // Make sure all the squares in columnsNotOccupied are Empty
+            foreach (int column in columnsNotOccupied)
+            {
+                Coord coord = new Coord(row, column);
+                if (board[coord].Type != Type.Empty)
+                {
+                    return false;
+                }
+            }
+
             //TODO
+            return true;
+            throw new NotImplementedException();
+        }
+
+        private bool IsAttacked(Coord coord)
+        {
+            // TODO
             return false;
             throw new NotImplementedException();
         }
@@ -424,7 +520,7 @@ namespace ChessEngine001
 
         public bool IsPseudoLegalKingMove()
         {
-            return IsPseduoLegalLongDistanceMove(Type.King);
+            return IsPseudoLegalCastleMove() || IsPseduoLegalLongDistanceMove(Type.King);
         }
 
         private bool IsPseduoLegalLongDistanceMove(Type type)
