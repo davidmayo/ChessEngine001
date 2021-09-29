@@ -30,7 +30,8 @@ namespace ChessEngine001
         }
         public override string ToString()
         {
-            return string.Format("{0}-{1}", StartSquare, EndSquare);
+            return this.MoveString;
+            //return string.Format("{0}-{1} [{2}]", StartSquare, EndSquare);
         }
 
         public Move( Coord start, Coord end, Board board)

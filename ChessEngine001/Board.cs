@@ -7,6 +7,8 @@ namespace ChessEngine001
 {
     class Board
     {
+        public static readonly string StartPositionFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+        
         private Piece[,] board;
         //private bool whiteToPlay;
         public Color ColorToPlay;
@@ -62,14 +64,20 @@ namespace ChessEngine001
         }
 
 
-        public Board() : this("rnbqkbnr/pppppppp/--------/--------/--------/--------/PPPPPPPP/RNBQKBNR")
+        //public Board() : this("rnbqkbnr/pppppppp/--------/--------/--------/--------/PPPPPPPP/RNBQKBNR")
+        public Board() : this("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+
         {
 
         }
 
-        public Board(string simpleString)
+        //public Board(string simpleString)
+        public Board(string fenString)
         {
             board = new Piece[8, 8];
+
+            UpdateBoardFromFenString(fenString);
+/*
             //whiteToPlay = true;
             ColorToPlay = Color.White;
 
@@ -99,7 +107,7 @@ namespace ChessEngine001
                 int col = i % 8;
 
                 board[row, col] = new Piece(charArray[i]);
-            }
+            }*/
         }
 
         public void UpdateBoardFromFenString( string fenString )
@@ -146,11 +154,66 @@ namespace ChessEngine001
 
                 // TODO: Update all the pieces
 
-                // TODO: Update side to move
-                // TODO: Update castling
-                // TODO: Update en passant target
-                // TODO: Update halfmove count
-                // TODO: Update move count
+                char[] charArray = rowString.ToCharArray();
+                for( int col = 0; col < 8; col++)
+                {
+                    board[7-row, col] = new Piece(charArray[col]);
+                }
+
+            } // for loop
+
+            // Update side to move
+            if (sideToMoveString.Trim().ToLower() == "w")
+            {
+                ColorToPlay = Color.White;
+            }
+            else if (sideToMoveString.Trim().ToLower() == "b")
+            {
+                ColorToPlay = Color.Black;
+            }
+            else
+            {
+                throw new ArgumentException(
+                    "FEN string included an invalid side to play [" + sideToMoveString + "]");
+            }
+
+            // Update castling
+            CanCastleKingsideWhite  = castlingString.Contains('K');
+            CanCastleQueensideWhite = castlingString.Contains('Q');
+            CanCastleKingsideBlack  = castlingString.Contains('k');
+            CanCastleQueensideBlack = castlingString.Contains('q');
+
+
+            // Update en passant target
+            if( enPassantTargetString == "-")
+            {
+                EnPassantTarget = null;
+            }
+            else
+            {
+                EnPassantTarget = new Coord(enPassantTargetString.Trim());
+            }
+
+            // Update halfmove count
+            try
+            {
+                halfmoveClock = int.Parse(halfmoveString.Trim());
+            }
+            catch (FormatException)
+            {
+                throw new ArgumentException(
+                    "FEN string included an invalid halfmove string [" + halfmoveString + "]");
+            }
+
+            // TODO: Update move count
+            try
+            {
+                fullmoveCount = int.Parse(fullmoveString.Trim());
+            }
+            catch (FormatException)
+            {
+                throw new ArgumentException(
+                    "FEN string included an invalid fullmove string [" + fullmoveString + "]");
             }
         }
 
