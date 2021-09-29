@@ -10,7 +10,7 @@ namespace ChessEngine001
             Board board;
             board = new Board("--------/--------/----k---/--------/--------/--------/--------/--------");
 
-            //board = new Board("rnb-k-nr/-pppp---/--------/--------/pbq-----/-P--Rppp/P-PPPPPP/RNBQKBN-");
+            board = new Board("rnb-k-nr/-pppp---/--------/--------/pbq-----/-P--Rppp/P-PPPPPP/RNBQKBN-");
             //board = new Board("n-------/--------/--------/--------/--------/--------/--------/--------");
             //board = new Board();
             //board = new Board("rnbqkbnr/pppppppp/--------/--------/-p-p----/--------/PPPPPPPP/RNBQKBNR");

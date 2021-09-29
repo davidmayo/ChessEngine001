@@ -8,8 +8,11 @@ namespace ChessEngine001
     class Board
     {
         private Piece[,] board;
-        private bool whiteToPlay;
+        //private bool whiteToPlay;
         public Color ColorToPlay;
+        private int halfmoveClock;
+        private int fullmoveCount;
+
 
         public bool CanCastleQueensideWhite { get; set; }
         public bool CanCastleQueensideBlack { get; set; }
@@ -17,12 +20,25 @@ namespace ChessEngine001
         public bool CanCastleKingsideBlack { get; set; }
         public Coord EnPassantTarget { get; set; }
         public Move MostRecentMove { get; set; }
+        public int HalfmoveClock
+        { 
+            get
+            {
+                return halfmoveClock;
+            }
+        }
 
-
-
-        public Piece this[int row,int column]
+        public int Fullmove
         {
-            get => board[row,column];
+            get
+            {
+                return fullmoveCount;
+            }
+        }
+
+        public Piece this[int row, int column]
+        {
+            get => board[row, column];
             set => board[row, column] = value;
 
         }
@@ -54,7 +70,7 @@ namespace ChessEngine001
         public Board(string simpleString)
         {
             board = new Piece[8, 8];
-            whiteToPlay = true;
+            //whiteToPlay = true;
             ColorToPlay = Color.White;
 
             CanCastleQueensideBlack = true;
@@ -62,7 +78,8 @@ namespace ChessEngine001
             CanCastleQueensideWhite = true;
             CanCastleKingsideWhite = true;
 
-
+            halfmoveClock = 5;
+            fullmoveCount = 40;
             //Console.WriteLine("simpleString\n" + simpleString);
 
             simpleString = simpleString.Replace("/", "");
@@ -70,9 +87,9 @@ namespace ChessEngine001
 
             var charArray = simpleString.ToCharArray();
 
-            for( int i = 0; i < 64; i++)
+            for (int i = 0; i < 64; i++)
             {
-                if( i%8 == 0)
+                if (i % 8 == 0)
                 {
                     //Console.WriteLine();
                 }
@@ -89,7 +106,7 @@ namespace ChessEngine001
         {
 
             // If the king moves, set the castling rights to false
-            if( this[move.StartSquare].Type == Type.King && ColorToPlay == Color.White )
+            if (this[move.StartSquare].Type == Type.King && ColorToPlay == Color.White)
             {
                 CanCastleKingsideWhite = false;
                 CanCastleQueensideWhite = false;
@@ -102,7 +119,7 @@ namespace ChessEngine001
 
             // If A8, H8, A1, or A8 are start position for this move, then the rook has moved
             // and that castle is now forever illegal
-            if( move.StartSquare == "a1")
+            if (move.StartSquare == "a1")
             {
                 CanCastleQueensideWhite = false;
             }
@@ -121,7 +138,7 @@ namespace ChessEngine001
 
             // Move the piece
             this[move.EndSquare] = this[move.StartSquare];
-            this[move.StartSquare] = new Piece('-');            
+            this[move.StartSquare] = new Piece('-');
 
             // Swap color to play
             ColorToPlay = 1 - ColorToPlay;
@@ -131,7 +148,7 @@ namespace ChessEngine001
 
             // Set en passant square
             EnPassantTarget = move.EnPassantTarget;
-            
+
         }
 
         public string ToFenString()
@@ -139,13 +156,13 @@ namespace ChessEngine001
             string fenString = "";
 
             // Iterate over the rows
-            for ( int row = 7; row >= 0; row-- )
+            for (int row = 7; row >= 0; row--)
             {
                 // Build a string for this row
                 // It will be of the form "-P--Q---"
                 string rowString = "";
 
-                for( int col = 0; col < 8; col++ )
+                for (int col = 0; col < 8; col++)
                 {
                     rowString += board[row, col].ToFenString();
                 }
@@ -157,7 +174,7 @@ namespace ChessEngine001
                 fenString += rowString;
 
                 // If this isn't the bottom row, add a /
-                if( row != 0)
+                if (row != 0)
                 {
                     fenString += "/";
                 }
@@ -186,7 +203,7 @@ namespace ChessEngine001
 
 
             // Encode the en passant target
-            if( EnPassantTarget is null)
+            if (EnPassantTarget is null)
             {
                 fenString += " -";
             }
@@ -196,12 +213,10 @@ namespace ChessEngine001
             }
 
             // Encode the halfmove clock
-            // NOT YET IMPLEMENTED
-            fenString += " 0";
+            fenString += string.Format(" {0}",HalfmoveClock);
 
             // Encode the fullmove number
-            // NOT YET IMPLEMENTED
-            fenString += " 1";
+            fenString += string.Format(" {0}",Fullmove);
 
             return fenString;
         }
@@ -210,25 +225,25 @@ namespace ChessEngine001
         private static string ConvertRowStringToFen(string rowString)
         {
             string rv = "";
-            for( int index = 0; index < rowString.Length; index++ )
+            for (int index = 0; index < rowString.Length; index++)
             {
                 char current = rowString[index];
 
                 // If it's not '-', then it's an actual piece and can be added to the FEN string
-                if( current != '-')
+                if (current != '-')
                 {
                     rv += current;
                 }
 
-                
+
                 else
                 {
                     // Otherwise, search until we find a non '-' char
                     // And count the '-' we find
                     int count = 1;
-                    for( int peekIndex = index+1; peekIndex < rowString.Length; peekIndex++)
+                    for (int peekIndex = index + 1; peekIndex < rowString.Length; peekIndex++)
                     {
-                        if( rowString[peekIndex] == '-')
+                        if (rowString[peekIndex] == '-')
                         {
                             count++;
                         }
@@ -250,23 +265,23 @@ namespace ChessEngine001
             string rv = "";
 
             rv += "     A   B   C   D   E   F   G   H";
-            for ( int row = 7; row >= 0; row--)
+            for (int row = 7; row >= 0; row--)
             {
                 rv += "\n   +-------------------------------+";
 
-                rv += string.Format( "\n {0} |",row+1);
+                rv += string.Format("\n {0} |", row + 1);
 
-                for ( int col = 0; col < 8; col++)
+                for (int col = 0; col < 8; col++)
                 {
                     string pieceString = board[row, col].ToFenString();
-                    if( pieceString == "-")
+                    if (pieceString == "-")
                     {
                         pieceString = " ";
                     }
-                    rv += string.Format( " {0} |", pieceString );
+                    rv += string.Format(" {0} |", pieceString);
                 }
                 rv += string.Format(" {0}", row + 1);
-                if( row == 7)
+                if (row == 7)
                 {
                     rv += "    " + ColorToPlay + " to play";
                 }
@@ -309,11 +324,11 @@ namespace ChessEngine001
         private string GetCastlingString()
         {
             string rv = "";
-            if( CanCastleQueensideBlack && CanCastleKingsideBlack)
+            if (CanCastleQueensideBlack && CanCastleKingsideBlack)
             {
                 rv += "Black: Q and K";
             }
-            else if( CanCastleQueensideBlack )
+            else if (CanCastleQueensideBlack)
             {
                 rv += "Black: Q";
             }
@@ -359,9 +374,9 @@ namespace ChessEngine001
             int column = 0;
             int row = 0;
 
-            foreach( char ch in boardString.ToCharArray())
+            foreach (char ch in boardString.ToCharArray())
             {
-                if( ch == '\n')
+                if (ch == '\n')
                 {
                     column = 0;
                     row++;
