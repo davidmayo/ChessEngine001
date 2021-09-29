@@ -8,7 +8,7 @@ namespace ChessEngine001
         {
             // Make a change again
             Board board;
-            board = new Board();
+            //board = new Board();
             //board = new Board("--------/--------/----k---/--------/--------/--------/--------/--------");
 
             //board = new Board("rnb-k-nr/-pppp---/--------/--------/pbq-----/-P--Rppp/P-PPPPPP/RNBQKBN-");
@@ -21,13 +21,14 @@ namespace ChessEngine001
             string testPositionFen  = "rnbNk1nr/1pppp3/8/8/pbq5/1P2Rppp/P1PPPPPP/RNBQKBN1 w KQkq - 5 40";
             string startPositionFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
             string castlePositionFen = "r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1";
+            string capturePositionFen = "k7/4B3/2Kb4/2P5/2NR1Q2/8/8/8 w - - 0 1";
             //board.UpdateBoardFromFenString(testPositionFen);
             //board.UpdateBoardFromFenString(startPositionFen);
             //board.UpdateBoardFromFenString(testPositionFen);
 
-            board.PrintBoard();
-            board = new Board(testPositionFen);
-            board.ColorToPlay = Color.Black;
+            //board.PrintBoard();
+            board = new Board(capturePositionFen);
+            //board.ColorToPlay = Color.Black;
             board.PrintBoard();
 
             Move move;

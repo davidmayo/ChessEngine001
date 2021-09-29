@@ -374,14 +374,23 @@ namespace ChessEngine001
                 return false;
             }
 
-            // EndSquare should be empty or opposite color
-            if (board[EndSquare].Type != Type.Empty || board[EndSquare].Color == board.ColorToPlay)
-            {
-                return false;
-            }
-            else
+            // Check end square
+
+            // If end square is empty, move is good.
+            if (board[EndSquare].Type == Type.Empty)
+                return true;
+
+            // If end square is occupied and opposite color, it's good (a capture)
+            else if (board[EndSquare].Color != board.ColorToPlay)
             {
                 return true;
+            }
+
+            // If end square is occupied and not opposite color, it's not legal
+            // (Can't capture own piece)
+            else
+            {
+                return false;
             }
         }
 
@@ -771,7 +780,6 @@ namespace ChessEngine001
             Coord currentCoord = new Coord(StartSquare.Row + rowDirection, StartSquare.Col + colDirection);
             while( currentCoord != EndSquare )
             {
-                //Console.WriteLine("   {0} {1}", currentCoord, EndSquare);
                 if( board[currentCoord].Type != Type.Empty)
                 {
                     return false;
@@ -779,20 +787,25 @@ namespace ChessEngine001
                 currentCoord = new Coord(currentCoord.Row + rowDirection, currentCoord.Col + colDirection);
 
             }
-            // EndSquare should be empty or opposite color
-            if (board[EndSquare].Type != Type.Empty || board[EndSquare].Color == board.ColorToPlay)
-            {
-                return false;
-            }
-            else
+
+            // Check end square
+
+            // If end square is empty, move is good.
+            if (board[EndSquare].Type == Type.Empty)
+                return true;
+
+            // If end square is occupied and opposite color, it's good (a capture)
+            else if(board[EndSquare].Color != board.ColorToPlay)
             {
                 return true;
             }
-            //Console.WriteLine("SHOULDN'T EVER GET HERE");
-            //return false;
 
-
-            //throw new NotImplementedException();
+            // If end square is occupied and not opposite color, it's not legal
+            // (Can't capture own piece)
+            else
+            {
+                return false;
+            }
         }
     }
 }
