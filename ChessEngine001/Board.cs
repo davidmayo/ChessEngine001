@@ -262,7 +262,7 @@ namespace ChessEngine001
             MostRecentMove = move;
 
             // Set en passant square
-            EnPassantTarget = move.EnPassantTarget;
+            //EnPassantTarget = move.EnPassantTarget;
 
         }
 

@@ -27,11 +27,25 @@ namespace ChessEngine001
             //board.UpdateBoardFromFenString(testPositionFen);
 
             //board.PrintBoard();
-            board = new Board(capturePositionFen);
+            board = new Board(startPositionFen);
             //board.ColorToPlay = Color.Black;
             board.PrintBoard();
 
             Move move;
+
+            move = new Move("e2","e4",board);
+            move = new Move("a2a4", board);
+
+            Console.WriteLine("MOVE DEFAULT: {0}", move);
+            Console.WriteLine("MOVE UCI    : {0}", move.ToUciMoveString());
+
+            if ( move.IsPseudoLegalMove())
+            {
+                board.MakeMove(move);
+            }
+            board.PrintBoard();
+
+            return;
             int count = 0;
             for( int start = 0; start < 64; start++)
             {

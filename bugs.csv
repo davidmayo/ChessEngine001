@@ -4,3 +4,4 @@ CLOSED,002,bishop move validation not working on captures
 CLOSED,003,queen move validation not working on captures
 CLOSED,004,knight move validation not working on captures
 CLOSED,005,king move validation not working on captures
+open,006,Algebraic notation makes no effort at disambiguating

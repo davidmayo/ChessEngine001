@@ -2,8 +2,11 @@ status,id,description
 TODO,001,Add IsCapture() to Move class
 TODO,002,Add IsCheck() to Move class
 TODO,003,Create MoveGenerator class
-TODO,004,Add support for UCI-style strings in Move constructor
+CLOSED,004,Add support for UCI-style strings in Move constructor
 TODO,005,Add support for pawn promotion
 TODO,006,Add IsLegal() method to Move class [major hassle]
 IN PROGRESS,007,Generate standard notation for moves e8=Q Ra8 Nh3+ O-O-O cxd5# etc
 TODO,008,Move constructor from standard notation for moves e8=Q Ra8 Nh3+ O-O-O cxd5# etc
+CLOSED,009,Add ToUciMoveString() method to Move class
+TODO,010,Clean up the board string text on right
+TODO,011,Re-implement MakeMove() in Board class

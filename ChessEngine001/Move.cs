@@ -10,8 +10,9 @@ namespace ChessEngine001
         public Coord StartSquare { get; }
         public Coord EndSquare { get; }
         public Piece Piece { get; }
-        public Coord EnPassantTarget { get => enPassantTarget; }
+        //public Coord EnPassantTarget { get => enPassantTarget; }
         public string MoveString { get => moveString; set => moveString = value; }
+        public Type PawnPromotionType { get; set; }
 
         
         private Coord enPassantTarget;
@@ -33,7 +34,7 @@ namespace ChessEngine001
             //return string.Format("{0}-{1} [{2}]", StartSquare, EndSquare);
         }
 
-        public Move( Coord start, Coord end, Board board)
+        public Move( Coord start, Coord end, Board board, Type pawnPromotionTarget = Type.Unknown)
         {
             enPassantTarget = null;
             StartSquare = start;
@@ -41,6 +42,92 @@ namespace ChessEngine001
             this.board = board;
 
             this.Piece = this.board[StartSquare];
+            PawnPromotionType = pawnPromotionTarget;
+        }
+
+        public Move(string uciString, Board board)
+        {
+            string startString;
+            string endString;
+            string promotionString;
+            if (uciString.Length == 4)
+            {
+                startString = uciString.Substring(0, 2);
+                endString = uciString.Substring(2, 2);
+                promotionString = "";
+
+            }
+            else if (uciString.Length == 5)
+            {
+                startString = uciString.Substring(0, 2);
+                endString = uciString.Substring(2, 2);
+                promotionString = uciString.Substring(4, 1);
+
+            }
+            else
+            {
+                throw new ArgumentException("UCI string incorrect length");
+            }
+
+            //string startString = uciString.Substring(0, 2);
+            //string endString = uciString.Substring(2, 2);
+            //string promotionString = uciString.Substring(4, 1);
+
+            StartSquare = new Coord(startString);
+            EndSquare = new Coord(endString);
+            this.board = board;
+            this.Piece = this.board[StartSquare];
+
+            enPassantTarget = null;
+
+            switch (promotionString.ToLower())
+            {
+                case "":
+                    PawnPromotionType = Type.Unknown;
+                    break;
+                case "q":
+                    PawnPromotionType = Type.Queen;
+                    break;
+                case "n":
+                    PawnPromotionType = Type.Knight;
+                    break;
+                case "r":
+                    PawnPromotionType = Type.Rook;
+                    break;
+                case "b":
+                    PawnPromotionType = Type.Bishop;
+                    break;
+                default:
+                    PawnPromotionType = Type.Unknown;
+                    break;
+            }
+
+            _ = IsPseudoLegalMove();
+        }
+
+        public string ToUciMoveString()
+        {
+            string pawnSuffix;
+            switch( PawnPromotionType)
+            {
+                case Type.Queen:
+                    pawnSuffix = "q";
+                    break;
+                case Type.Knight:
+                    pawnSuffix = "n";
+                    break;
+                case Type.Rook:
+                    pawnSuffix = "r";
+                    break;
+                case Type.Bishop:
+                    pawnSuffix = "b";
+                    break;
+                default:
+                    pawnSuffix = "";
+                    break;
+            }
+
+            return string.Format("{0}{1}{2}",StartSquare,EndSquare,pawnSuffix);
         }
 
         public bool IsPseudoLegalMove()
@@ -161,7 +248,8 @@ namespace ChessEngine001
             {
                 if (IsPseudoLegalPawnEnPassantCapture())
                 {
-                    moveString = string.Format("[{0}-{1}] Pawn capture (en passant)", StartSquare, EndSquare);
+                    moveString = string.Format("[{0}-{1}] {2}x{1} e.p.", StartSquare, EndSquare, StartSquare.ToString()[0]);
+                    //moveString = string.Format("[{0}-{1}] Pawn capture (en passant)", StartSquare, EndSquare);
                     return true;
                 }
                 else if (IsPseudoLegalPawnCapture())
