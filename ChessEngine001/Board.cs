@@ -102,6 +102,58 @@ namespace ChessEngine001
             }
         }
 
+        public void UpdateBoardFromFenString( string fenString )
+        {
+            string[] stringFields = fenString.Trim().Split(' ');
+            if( stringFields.Length != 6 )
+            {
+                throw new ArgumentException("FEN string did not have six fields");
+            }
+
+            string piecePositionString   = stringFields[0].Trim();
+            string sideToMoveString      = stringFields[1].Trim();
+            string castlingString        = stringFields[2].Trim();
+            string enPassantTargetString = stringFields[3].Trim();
+            string halfmoveString        = stringFields[4].Trim();
+            string fullmoveString        = stringFields[5].Trim();
+
+            // Figure out the board
+            string[] rowStrings = piecePositionString.Trim().Split('/');
+            if (rowStrings.Length != 8)
+            {
+                throw new ArgumentException("FEN string did contain eight rows");
+            }
+            for( int row = 0; row < 8; row++)
+            {
+                string rowString = rowStrings[row];
+                // rowString will be something like "2Q3p1"
+
+                // Expand the numbers into dashes
+                rowString = rowString.Replace("1", "-");
+                rowString = rowString.Replace("2", "--");
+                rowString = rowString.Replace("3", "---");
+                rowString = rowString.Replace("4", "----");
+                rowString = rowString.Replace("5", "-----");
+                rowString = rowString.Replace("6", "------");
+                rowString = rowString.Replace("7", "-------");
+                rowString = rowString.Replace("8", "--------");
+
+                // rowString should now be something like "--Q---p-"
+                if( rowString.Length != 8)
+                {
+                    throw new ArgumentException("FEN string included a row that didn't have 8 squares [" + rowString + "]");
+                }
+
+                // TODO: Update all the pieces
+
+                // TODO: Update side to move
+                // TODO: Update castling
+                // TODO: Update en passant target
+                // TODO: Update halfmove count
+                // TODO: Update move count
+            }
+        }
+
         public void MakeMove(Move move)
         {
 

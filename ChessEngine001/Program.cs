@@ -18,14 +18,25 @@ namespace ChessEngine001
             
             board.PrintBoard();
 
+            string testPositionFen = "rnb1k1nr/1pppp3/8/8/pbq5/1P2Rppp/P1PPPPPP/RNBQKBN1 w KQkq - 5 40";
 
-            Move move = new Move("e2", "e4", board);
-            if( move.IsPseudoLegalMove())
+            board.UpdateBoardFromFenString(testPositionFen);
+
+
+            Move move;
+            int count = 0;
+            for( int start = 0; start < 64; start++)
             {
-                board.MakeMove(move);
+                for( int end = 0; end < 64; end++ )
+                {
+                    move = new Move(new Coord(start), new Coord(end), board);
+                    if (move.IsPseudoLegalMove())
+                    {
+                        count++;
+                        Console.WriteLine("[pseudo-legal] {0,5}: {1}", count, move);
+                    }
+                }
             }
-            board.PrintBoard();
-
-        }
+        } // Main()
     }
 }
