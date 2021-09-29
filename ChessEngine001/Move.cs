@@ -19,8 +19,7 @@ namespace ChessEngine001
 
         public bool IsCapture()
         {
-            // TODO
-            return false;
+            return !(board[EndSquare] is null) && !(board[EndSquare].Type == Type.Empty);
         }
 
         public bool IsCheck()
@@ -62,11 +61,23 @@ namespace ChessEngine001
                 if (IsPseudoLegalCastleMove())
                 {
                     moveString = string.Format("[{0}-{1}] Castle", StartSquare, EndSquare);
+                    if( EndSquare.Col == 2)
+                    {
+                        moveString = string.Format("[{0}-{1}] O-O-O", StartSquare, EndSquare);
+                    }
+                    else
+                    {
+                        moveString = string.Format("[{0}-{1}] O-O", StartSquare, EndSquare);
+                    }
                     return true;
                 }
                 else if (IsPseudoLegalKingMove())
                 {
-                    moveString = string.Format("[{0}-{1}] King move", StartSquare, EndSquare);
+                    //moveString = string.Format("[{0}-{1}] King move", StartSquare, EndSquare);
+                    if( IsCapture())
+                        moveString = string.Format("[{0}-{1}] Kx{1}", StartSquare, EndSquare);
+                    else
+                        moveString = string.Format("[{0}-{1}] K{1}", StartSquare, EndSquare);
                     return true;
                 }
                 else
@@ -80,7 +91,11 @@ namespace ChessEngine001
             {
                 if (IsPseudoLegalQueenMove())
                 {
-                    moveString = string.Format("[{0}-{1}] Queen move", StartSquare, EndSquare);
+                    //moveString = string.Format("[{0}-{1}] Queen move", StartSquare, EndSquare);
+                    if (IsCapture())
+                        moveString = string.Format("[{0}-{1}] Qx{1}", StartSquare, EndSquare);
+                    else
+                        moveString = string.Format("[{0}-{1}] Q{1}", StartSquare, EndSquare);
                     return true;
                 }
                 else
@@ -93,7 +108,12 @@ namespace ChessEngine001
             {
                 if (IsPseudoLegalRookMove())
                 {
-                    moveString = string.Format("[{0}-{1}] Rook move", StartSquare, EndSquare);
+                    //moveString = string.Format("[{0}-{1}] Rook move", StartSquare, EndSquare);
+                    if (IsCapture())
+                        moveString = string.Format("[{0}-{1}] Rx{1}", StartSquare, EndSquare);
+                    else
+                        moveString = string.Format("[{0}-{1}] R{1}", StartSquare, EndSquare);
+                    return true;
                     return true;
                 }
                 else
@@ -106,7 +126,12 @@ namespace ChessEngine001
             {
                 if (IsPseudoLegalBishopMove())
                 {
-                    moveString = string.Format("[{0}-{1}] Bishop move", StartSquare, EndSquare);
+                    //moveString = string.Format("[{0}-{1}] Bishop move", StartSquare, EndSquare);
+                    if (IsCapture())
+                        moveString = string.Format("[{0}-{1}] Bx{1}", StartSquare, EndSquare);
+                    else
+                        moveString = string.Format("[{0}-{1}] B{1}", StartSquare, EndSquare);
+                    return true;
                     return true;
                 }
                 else
@@ -119,7 +144,11 @@ namespace ChessEngine001
             {
                 if (IsPseudoLegalKnightMove())
                 {
-                    moveString = string.Format("[{0}-{1}] Knight move", StartSquare, EndSquare);
+                    //moveString = string.Format("[{0}-{1}] Knight move", StartSquare, EndSquare);
+                    if (IsCapture())
+                        moveString = string.Format("[{0}-{1}] Nx{1}", StartSquare, EndSquare);
+                    else
+                        moveString = string.Format("[{0}-{1}] N{1}", StartSquare, EndSquare);
                     return true;
                 }
                 else
@@ -137,12 +166,13 @@ namespace ChessEngine001
                 }
                 else if (IsPseudoLegalPawnCapture())
                 {
-                    moveString = string.Format("[{0}-{1}] Pawn capture", StartSquare, EndSquare);
+                    moveString = string.Format("[{0}-{1}] {2}x{1}", StartSquare, EndSquare, StartSquare.ToString()[0]);
                     return true;
                 }
                 else if (IsPseudoLegalPawnPush())
                 {
-                    moveString = string.Format("[{0}-{1}] Pawn push", StartSquare, EndSquare);
+                    //moveString = string.Format("[{0}-{1}] Pawn push", StartSquare, EndSquare);
+                    moveString = string.Format("[{0}-{1}] {1}", StartSquare, EndSquare);
                     return true;
                 }
                 else

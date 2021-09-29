@@ -1,2 +1,6 @@
 status,id,bug
-TODO,1,rook move validation not working on captures
+TODO,001,rook move validation not working on captures
+TODO,002,bishop move validation not working on captures
+TODO,003,queen move validation not working on captures
+TODO,004,knight move validation not working on captures
+TODO,005,king move validation not working on captures

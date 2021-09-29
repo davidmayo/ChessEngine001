@@ -18,14 +18,16 @@ namespace ChessEngine001
             //board = new Board("r---k--r/pppppppp/--------/--------/--------/--------/PPPPPPPP/R---K--R");
             
 
-            string testPositionFen  = "rnb1k1nr/1pppp3/8/8/pbq5/1P2Rppp/P1PPPPPP/RNBQKBN1 w KQkq - 5 40";
+            string testPositionFen  = "rnbNk1nr/1pppp3/8/8/pbq5/1P2Rppp/P1PPPPPP/RNBQKBN1 w KQkq - 5 40";
             string startPositionFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+            string castlePositionFen = "r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1";
             //board.UpdateBoardFromFenString(testPositionFen);
             //board.UpdateBoardFromFenString(startPositionFen);
             //board.UpdateBoardFromFenString(testPositionFen);
 
             board.PrintBoard();
             board = new Board(testPositionFen);
+            board.ColorToPlay = Color.Black;
             board.PrintBoard();
 
             Move move;
