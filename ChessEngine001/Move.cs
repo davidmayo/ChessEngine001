@@ -6,21 +6,50 @@ namespace ChessEngine001
 {
     class Move
     {
+        // The board on which the move will take place
         private Board board;
-        public Coord StartSquare { get; }
-        public Coord EndSquare { get; }
-        public Piece Piece { get; }
-        //public Coord EnPassantTarget { get => enPassantTarget; }
-        public string MoveString { get => moveString; set => moveString = value; }
-        public Type PawnPromotionType { get; set; }
 
-        
-        private Coord enPassantTarget;
+        // To coordinate that the piece is moving from
+        public Coord FromSquare { get; }
+
+        // The coordinate that the piece is moving to
+        public Coord ToSquare { get; }
+
+        // The specific Piece being moved
+        public Piece PieceToMove { get; }
+
+        // The piece that a pawn will promote to
+        // Will either be null or a Piece, if provided
+        public Piece PawnPromotionType { get => pawnPromotionType; }
+
+        // The en passant target square that will result if this move is carried out
+        // Will be null UNLESS this is a 2 square pawn push, in which case
+        // It will be the coordinate BEHIND the pawn (ie, the square between
+        // the To and From squares)
+        public Coord ResultingEnPassantTarget { get => resultingEnPassantTarget; }
+
+        // Field for EnPassantTarget property
+        private Coord resultingEnPassantTarget;
+
+        // A string representing the move, form like "[a2-a4] Ra4"
+        // This is a placeholder that needs to be removed eventually
         private string moveString;
+
+        // field for PawnPromotionType property
+        private Piece pawnPromotionType;
 
         public bool IsCapture()
         {
-            return !(board[EndSquare] is null) && !(board[EndSquare].Type == Type.Empty);
+            // TODO: Handle en passant
+            //
+            // For non-en passant moves, it's a capture if and only if ToSquare is occupied
+            //
+            // This will return true for cases of capturing own pieces, but that's illegal,
+            // so we don't waste time checking for that.
+            //
+            // Castling can never be a capture, and castling never has an occupied ToSquare,
+            // so no problem there.
+            return !(board[ToSquare].Type == Type.Empty);
         }
 
         public bool IsCheck()
@@ -30,19 +59,21 @@ namespace ChessEngine001
         }
         public override string ToString()
         {
-            return this.MoveString;
-            //return string.Format("{0}-{1} [{2}]", StartSquare, EndSquare);
+            return this.moveString;
         }
 
-        public Move( Coord start, Coord end, Board board, Type pawnPromotionTarget = Type.Unknown)
+        public Move(Coord start, Coord end, Board board, Piece pawnPromotionTarget = null)
         {
-            enPassantTarget = null;
-            StartSquare = start;
-            EndSquare = end;
+            resultingEnPassantTarget = null;
+            FromSquare = start;
+            ToSquare = end;
             this.board = board;
 
-            this.Piece = this.board[StartSquare];
-            PawnPromotionType = pawnPromotionTarget;
+            this.PieceToMove = this.board[FromSquare];
+            pawnPromotionType = pawnPromotionTarget;
+
+            // TODO: Refactor this to be something like EvaluateMove();
+            _ = IsPseudoLegalMove();
         }
 
         public Move(string uciString, Board board)
@@ -69,210 +100,202 @@ namespace ChessEngine001
                 throw new ArgumentException("UCI string incorrect length");
             }
 
-            //string startString = uciString.Substring(0, 2);
-            //string endString = uciString.Substring(2, 2);
-            //string promotionString = uciString.Substring(4, 1);
-
-            StartSquare = new Coord(startString);
-            EndSquare = new Coord(endString);
+            FromSquare = new Coord(startString);
+            ToSquare = new Coord(endString);
             this.board = board;
-            this.Piece = this.board[StartSquare];
+            this.PieceToMove = this.board[FromSquare];
 
-            enPassantTarget = null;
+            resultingEnPassantTarget = null;
+
+            Type pieceType;
 
             switch (promotionString.ToLower())
             {
                 case "":
-                    PawnPromotionType = Type.Unknown;
+                    pieceType = Type.Unknown;
                     break;
                 case "q":
-                    PawnPromotionType = Type.Queen;
+                    pieceType = Type.Queen;
                     break;
                 case "n":
-                    PawnPromotionType = Type.Knight;
+                    pieceType = Type.Knight;
                     break;
                 case "r":
-                    PawnPromotionType = Type.Rook;
+                    pieceType = Type.Rook;
                     break;
                 case "b":
-                    PawnPromotionType = Type.Bishop;
+                    pieceType = Type.Bishop;
                     break;
                 default:
-                    PawnPromotionType = Type.Unknown;
+                    pieceType = Type.Unknown;
                     break;
             }
 
+            pawnPromotionType = new Piece(pieceType, board.ColorToPlay);
+
+            // TODO: Refactor this to be something like EvaluateMove();
             _ = IsPseudoLegalMove();
         }
 
         public string ToUciMoveString()
         {
             string pawnSuffix;
-            switch( PawnPromotionType)
+
+            if (PawnPromotionType is null)
             {
-                case Type.Queen:
-                    pawnSuffix = "q";
-                    break;
-                case Type.Knight:
-                    pawnSuffix = "n";
-                    break;
-                case Type.Rook:
-                    pawnSuffix = "r";
-                    break;
-                case Type.Bishop:
-                    pawnSuffix = "b";
-                    break;
-                default:
-                    pawnSuffix = "";
-                    break;
+                pawnSuffix = "";
+            }
+            else
+            {
+                pawnSuffix = PawnPromotionType.ToFenString().ToLower();
             }
 
-            return string.Format("{0}{1}{2}",StartSquare,EndSquare,pawnSuffix);
+            return string.Format("{0}{1}{2}", FromSquare, ToSquare, pawnSuffix);
         }
 
         public bool IsPseudoLegalMove()
         {
-            if( Piece.Type == Type.Empty)
+            if (PieceToMove.Type == Type.Empty)
             {
-                moveString = string.Format("[{0}-{1}] Illegal move: {0} unoccupied",StartSquare,EndSquare);
+                moveString = string.Format("[{0}-{1}] Illegal move: {0} unoccupied", FromSquare, ToSquare);
                 return false;
             }
-            if( Piece.Color != board.ColorToPlay )
+            if (PieceToMove.Color != board.ColorToPlay)
             {
-                moveString = string.Format("[{0}-{1}] Illegal move: {0} wrong color", StartSquare, EndSquare);
+                moveString = string.Format("[{0}-{1}] Illegal move: {0} wrong color", FromSquare, ToSquare);
                 return false;
             }
 
-            if (Piece.Type == Type.King)
+            if (PieceToMove.Type == Type.King)
             {
                 if (IsPseudoLegalCastleMove())
                 {
-                    moveString = string.Format("[{0}-{1}] Castle", StartSquare, EndSquare);
-                    if( EndSquare.Col == 2)
+                    moveString = string.Format("[{0}-{1}] Castle", FromSquare, ToSquare);
+                    if (ToSquare.Col == 2)
                     {
-                        moveString = string.Format("[{0}-{1}] O-O-O", StartSquare, EndSquare);
+                        moveString = string.Format("[{0}-{1}] O-O-O", FromSquare, ToSquare);
                     }
                     else
                     {
-                        moveString = string.Format("[{0}-{1}] O-O", StartSquare, EndSquare);
+                        moveString = string.Format("[{0}-{1}] O-O", FromSquare, ToSquare);
                     }
                     return true;
                 }
                 else if (IsPseudoLegalKingMove())
                 {
                     //moveString = string.Format("[{0}-{1}] King move", StartSquare, EndSquare);
-                    if( IsCapture())
-                        moveString = string.Format("[{0}-{1}] Kx{1}", StartSquare, EndSquare);
+                    if (IsCapture())
+                        moveString = string.Format("[{0}-{1}] Kx{1}", FromSquare, ToSquare);
                     else
-                        moveString = string.Format("[{0}-{1}] K{1}", StartSquare, EndSquare);
+                        moveString = string.Format("[{0}-{1}] K{1}", FromSquare, ToSquare);
                     return true;
                 }
                 else
                 {
-                    moveString = string.Format("[{0}-{1}] Illegal king move", StartSquare, EndSquare);
+                    moveString = string.Format("[{0}-{1}] Illegal king move", FromSquare, ToSquare);
                     return false;
                 }
             }
 
-            else if (Piece.Type == Type.Queen)
+            else if (PieceToMove.Type == Type.Queen)
             {
                 if (IsPseudoLegalQueenMove())
                 {
                     //moveString = string.Format("[{0}-{1}] Queen move", StartSquare, EndSquare);
                     if (IsCapture())
-                        moveString = string.Format("[{0}-{1}] Qx{1}", StartSquare, EndSquare);
+                        moveString = string.Format("[{0}-{1}] Qx{1}", FromSquare, ToSquare);
                     else
-                        moveString = string.Format("[{0}-{1}] Q{1}", StartSquare, EndSquare);
+                        moveString = string.Format("[{0}-{1}] Q{1}", FromSquare, ToSquare);
                     return true;
                 }
                 else
                 {
-                    moveString = string.Format("[{0}-{1}] Illegal queen move", StartSquare, EndSquare);
+                    moveString = string.Format("[{0}-{1}] Illegal queen move", FromSquare, ToSquare);
                     return false;
                 }
             }
-            else if (Piece.Type == Type.Rook)
+            else if (PieceToMove.Type == Type.Rook)
             {
                 if (IsPseudoLegalRookMove())
                 {
                     //moveString = string.Format("[{0}-{1}] Rook move", StartSquare, EndSquare);
                     if (IsCapture())
-                        moveString = string.Format("[{0}-{1}] Rx{1}", StartSquare, EndSquare);
+                        moveString = string.Format("[{0}-{1}] Rx{1}", FromSquare, ToSquare);
                     else
-                        moveString = string.Format("[{0}-{1}] R{1}", StartSquare, EndSquare);
+                        moveString = string.Format("[{0}-{1}] R{1}", FromSquare, ToSquare);
                     return true;
                     return true;
                 }
                 else
                 {
-                    moveString = string.Format("[{0}-{1}] Illegal rook move", StartSquare, EndSquare);
+                    moveString = string.Format("[{0}-{1}] Illegal rook move", FromSquare, ToSquare);
                     return false;
                 }
             }
-            else if (Piece.Type == Type.Bishop)
+            else if (PieceToMove.Type == Type.Bishop)
             {
                 if (IsPseudoLegalBishopMove())
                 {
                     //moveString = string.Format("[{0}-{1}] Bishop move", StartSquare, EndSquare);
                     if (IsCapture())
-                        moveString = string.Format("[{0}-{1}] Bx{1}", StartSquare, EndSquare);
+                        moveString = string.Format("[{0}-{1}] Bx{1}", FromSquare, ToSquare);
                     else
-                        moveString = string.Format("[{0}-{1}] B{1}", StartSquare, EndSquare);
+                        moveString = string.Format("[{0}-{1}] B{1}", FromSquare, ToSquare);
                     return true;
                     return true;
                 }
                 else
                 {
-                    moveString = string.Format("[{0}-{1}] Illegal bishop move", StartSquare, EndSquare);
+                    moveString = string.Format("[{0}-{1}] Illegal bishop move", FromSquare, ToSquare);
                     return false;
                 }
             }
-            else if (Piece.Type == Type.Knight)
+            else if (PieceToMove.Type == Type.Knight)
             {
                 if (IsPseudoLegalKnightMove())
                 {
                     //moveString = string.Format("[{0}-{1}] Knight move", StartSquare, EndSquare);
                     if (IsCapture())
-                        moveString = string.Format("[{0}-{1}] Nx{1}", StartSquare, EndSquare);
+                        moveString = string.Format("[{0}-{1}] Nx{1}", FromSquare, ToSquare);
                     else
-                        moveString = string.Format("[{0}-{1}] N{1}", StartSquare, EndSquare);
+                        moveString = string.Format("[{0}-{1}] N{1}", FromSquare, ToSquare);
                     return true;
                 }
                 else
                 {
-                    moveString = string.Format("[{0}-{1}] Illegal Knight move", StartSquare, EndSquare);
+                    moveString = string.Format("[{0}-{1}] Illegal Knight move", FromSquare, ToSquare);
                     return false;
                 }
             }
-            else if (Piece.Type == Type.Pawn)
+            else if (PieceToMove.Type == Type.Pawn)
             {
                 if (IsPseudoLegalPawnEnPassantCapture())
                 {
-                    moveString = string.Format("[{0}-{1}] {2}x{1} e.p.", StartSquare, EndSquare, StartSquare.ToString()[0]);
+                    moveString = string.Format("[{0}-{1}] {2}x{1} e.p.", FromSquare, ToSquare, FromSquare.ToString()[0]);
                     //moveString = string.Format("[{0}-{1}] Pawn capture (en passant)", StartSquare, EndSquare);
                     return true;
                 }
                 else if (IsPseudoLegalPawnCapture())
                 {
-                    moveString = string.Format("[{0}-{1}] {2}x{1}", StartSquare, EndSquare, StartSquare.ToString()[0]);
+                    moveString = string.Format("[{0}-{1}] {2}x{1}", FromSquare, ToSquare, FromSquare.ToString()[0]);
                     return true;
                 }
                 else if (IsPseudoLegalPawnPush())
                 {
                     //moveString = string.Format("[{0}-{1}] Pawn push", StartSquare, EndSquare);
-                    moveString = string.Format("[{0}-{1}] {1}", StartSquare, EndSquare);
+                    moveString = string.Format("[{0}-{1}] {1}", FromSquare, ToSquare);
                     return true;
                 }
                 else
                 {
-                    moveString = string.Format("[{0}-{1}] Illegal pawn move", StartSquare, EndSquare);
+                    moveString = string.Format("[{0}-{1}] Illegal pawn move", FromSquare, ToSquare);
                     return false;
                 }
             }
             else
             {
                 // This should be unreachable code
-                moveString = string.Format("[{0}-{1}] Illegal move", StartSquare, EndSquare);
+                moveString = string.Format("[{0}-{1}] Illegal move", FromSquare, ToSquare);
                 return false;
             }
         }
@@ -285,13 +308,13 @@ namespace ChessEngine001
         private bool IsPseudoLegalPawnCapture()
         {
             // En passant
-            if( IsPseudoLegalPawnEnPassantCapture() )
+            if (IsPseudoLegalPawnEnPassantCapture())
             {
                 return true;
             }
 
             // Piece is a pawn
-            if (board[StartSquare].Type != Type.Pawn)
+            if (board[FromSquare].Type != Type.Pawn)
             {
                 //Console.WriteLine("BAD: {0} is not a pawn", StartSquare);
                 return false;
@@ -302,7 +325,7 @@ namespace ChessEngine001
             }
 
             // Piece is correct color
-            if (board[StartSquare].Color != board.ColorToPlay)
+            if (board[FromSquare].Color != board.ColorToPlay)
             {
                 //Console.WriteLine("BAD: {0} is {1}, but it is {2} to play", StartSquare, board[StartSquare].Color, board.ColorToPlay);
                 return false;
@@ -313,7 +336,7 @@ namespace ChessEngine001
             }
 
             // Destination is +1 column or -1 columns
-            if (StartSquare.Col != EndSquare.Col + 1 && StartSquare.Col != EndSquare.Col - 1)
+            if (FromSquare.Col != ToSquare.Col + 1 && FromSquare.Col != ToSquare.Col - 1)
             {
                 //Console.WriteLine("BAD: {0} and {1} not in neighboring column", StartSquare, EndSquare);
                 return false;
@@ -327,7 +350,7 @@ namespace ChessEngine001
             // -1 if black to play
             // +1 if white to play
             int direction = 1 - 2 * (int)board.ColorToPlay;
-            if( StartSquare.Row + direction != EndSquare.Row)
+            if (FromSquare.Row + direction != ToSquare.Row)
             {
                 //Console.WriteLine("BAD: {1} is not one rank further than {0}", StartSquare, EndSquare);
                 return false;
@@ -338,7 +361,7 @@ namespace ChessEngine001
             }
 
             // Destination is occupied
-            if ( board[EndSquare].Type == Type.Empty)
+            if (board[ToSquare].Type == Type.Empty)
             {
                 //Console.WriteLine("BAD: {0} is empty", EndSquare);
                 return false;
@@ -349,7 +372,7 @@ namespace ChessEngine001
             }
 
             // Destination square is of opposite color
-            if ( board[EndSquare].Color == board.ColorToPlay)
+            if (board[ToSquare].Color == board.ColorToPlay)
             {
                 //Console.WriteLine("BAD: {0} is the same color as {1}", StartSquare, EndSquare);
                 return false;
@@ -369,7 +392,7 @@ namespace ChessEngine001
         private bool IsPseudoLegalPawnEnPassantCapture()
         {
             // Make sure Start is a pawn of the right color
-            if( Piece.Type != Type.Pawn || Piece.Color != board.ColorToPlay)
+            if (PieceToMove.Type != Type.Pawn || PieceToMove.Color != board.ColorToPlay)
             {
                 //Console.WriteLine("DEBUG: bad type or color");
                 return false;
@@ -380,7 +403,7 @@ namespace ChessEngine001
             }
 
             // Make sure EnPassantTarget is not null
-            if ( board.EnPassantTarget is null )
+            if (board.EnPassantTarget is null)
             {
                 //Console.WriteLine("DEBUG: EnPassantTarget is null");
                 return false;
@@ -392,7 +415,7 @@ namespace ChessEngine001
 
 
             // Make sure that End == EnPassantTarget
-            if ( EndSquare != board.EnPassantTarget)
+            if (ToSquare != board.EnPassantTarget)
             {
                 //Console.WriteLine("DEBUG: BAD: EndSquare not equal EnPassantTarget");
                 //Console.WriteLine("DEBUG: EndSquare={0}   EnPassantTarget={1}",EndSquare,board.EnPassantTarget);
@@ -408,18 +431,18 @@ namespace ChessEngine001
 
 
             // Make sure that Start is the valid row
-            int validStartRow = Piece.Color == Color.White ? 4 : 3;
+            int validStartRow = PieceToMove.Color == Color.White ? 4 : 3;
             //Console.WriteLine("DEBUG: validStartRow=" + validStartRow);
             //Console.WriteLine("DEBUG: StartSquare.Row=" + StartSquare.Row);
 
-            if ( StartSquare.Row != validStartRow )
+            if (FromSquare.Row != validStartRow)
             {
                 return false;
             }
 
             // Make sure that EnPassantTarget is exactly one column offset from Start
-            if( (board.EnPassantTarget.Col - StartSquare.Col != 1) &&
-                (board.EnPassantTarget.Col - StartSquare.Col != -1))
+            if ((board.EnPassantTarget.Col - FromSquare.Col != 1) &&
+                (board.EnPassantTarget.Col - FromSquare.Col != -1))
             {
                 return false;
             }
@@ -432,7 +455,7 @@ namespace ChessEngine001
         private bool IsPseudoLegalKnightMove()
         {
             // Piece is a pawn
-            if (board[StartSquare].Type != Type.Knight)
+            if (board[FromSquare].Type != Type.Knight)
             {
                 return false;
             }
@@ -441,7 +464,7 @@ namespace ChessEngine001
             }
 
             // Piece is correct color
-            if (board[StartSquare].Color != board.ColorToPlay)
+            if (board[FromSquare].Color != board.ColorToPlay)
             {
                 return false;
             }
@@ -450,10 +473,10 @@ namespace ChessEngine001
             }
 
             // End is (+/-2,+/-1) or (+/-1,+/-2) away
-            int rowDistance = Math.Abs(StartSquare.Row - EndSquare.Row);
-            int colDistance = Math.Abs(StartSquare.Col - EndSquare.Col);
-            if( ( rowDistance == 1 && colDistance == 2 ) ||
-                ( rowDistance == 2 && colDistance ==1 ))
+            int rowDistance = Math.Abs(FromSquare.Row - ToSquare.Row);
+            int colDistance = Math.Abs(FromSquare.Col - ToSquare.Col);
+            if ((rowDistance == 1 && colDistance == 2) ||
+                (rowDistance == 2 && colDistance == 1))
             {
                 ; // Do nothing
             }
@@ -465,11 +488,11 @@ namespace ChessEngine001
             // Check end square
 
             // If end square is empty, move is good.
-            if (board[EndSquare].Type == Type.Empty)
+            if (board[ToSquare].Type == Type.Empty)
                 return true;
 
             // If end square is occupied and opposite color, it's good (a capture)
-            else if (board[EndSquare].Color != board.ColorToPlay)
+            else if (board[ToSquare].Color != board.ColorToPlay)
             {
                 return true;
             }
@@ -485,32 +508,32 @@ namespace ChessEngine001
         private bool IsPseudoLegalCastleMove()
         {
             // Start square must be a king and must be correct color
-            if (board[StartSquare].Type != Type.King || board[StartSquare].Color != board.ColorToPlay)
+            if (board[FromSquare].Type != Type.King || board[FromSquare].Color != board.ColorToPlay)
             {
                 return false;
             }
 
             // Make sure START and END are on same row
-            if (StartSquare.Row != EndSquare.Row)
+            if (FromSquare.Row != ToSquare.Row)
                 return false;
 
             // Make sure START is rank 1 or rank 8
-            if (StartSquare.Row != 0 && StartSquare.Row != 7)
+            if (FromSquare.Row != 0 && FromSquare.Row != 7)
             {
                 return false;
             }
 
             // Make sure START is on E file
-            if (StartSquare.Col != 4)
+            if (FromSquare.Col != 4)
                 return false;
 
             // Make sure END is on C or G file
-            if (EndSquare.Col != 2 && EndSquare.Col != 6)
+            if (ToSquare.Col != 2 && ToSquare.Col != 6)
                 return false;
 
             // Determine if it's queenside
             bool isQueenside;
-            if (EndSquare.Col == 2)
+            if (ToSquare.Col == 2)
                 isQueenside = true;
             else
                 isQueenside = false;
@@ -518,7 +541,7 @@ namespace ChessEngine001
             // Determine color
             bool isWhite;
             int row;
-            if (EndSquare.Row == 0)
+            if (ToSquare.Row == 0)
             {
                 row = 0;
                 isWhite = true;
@@ -542,22 +565,22 @@ namespace ChessEngine001
             // Make arrays of columns to check for being unoccupied and not in check
             int[] columnsNotOccupied;
             int[] columnsNotInCheck;
-            if( isQueenside )
+            if (isQueenside)
             {
-                columnsNotOccupied = new int[] { 1,2,3 };
-                columnsNotInCheck = new int[] { 2,3,4 };
+                columnsNotOccupied = new int[] { 1, 2, 3 };
+                columnsNotInCheck = new int[] { 2, 3, 4 };
             }
             else
             {
                 columnsNotOccupied = new int[] { 5, 6 };
-                columnsNotInCheck = new int[] { 4,5,6 };
+                columnsNotInCheck = new int[] { 4, 5, 6 };
             }
 
             // Make sure all the squares in columnsNotInCheck are not in check
-            foreach( int column in columnsNotInCheck)
+            foreach (int column in columnsNotInCheck)
             {
                 Coord coord = new Coord(row, column);
-                if( IsAttacked(coord) )
+                if (IsAttacked(coord))
                 {
                     return false;
                 }
@@ -587,7 +610,7 @@ namespace ChessEngine001
 
         private bool IsPseudoLegalPawnPush()
         {
-            if (board[StartSquare].Type != Type.Pawn)
+            if (board[FromSquare].Type != Type.Pawn)
             {
                 //Console.WriteLine("BAD: {0} is not a pawn", StartSquare);
                 return false;
@@ -597,7 +620,7 @@ namespace ChessEngine001
                 //Console.WriteLine("GOOD: {0} is a pawn", StartSquare);
             }
 
-            if ( board[StartSquare].Color != board.ColorToPlay)
+            if (board[FromSquare].Color != board.ColorToPlay)
             {
                 //Console.WriteLine("BAD: {0} is {1}, but it is {2} to play", StartSquare, board[StartSquare].Color, board.ColorToPlay);
                 return false;
@@ -607,7 +630,7 @@ namespace ChessEngine001
                 //Console.WriteLine("GOOD: {0} is {1}, and it is {2} to play", StartSquare, board[StartSquare].Color, board.ColorToPlay);
             }
 
-            if ( StartSquare.Col != EndSquare.Col)
+            if (FromSquare.Col != ToSquare.Col)
             {
                 //Console.WriteLine("BAD: {0} and {1} not in same column", StartSquare, EndSquare);
                 return false;
@@ -621,11 +644,11 @@ namespace ChessEngine001
             // +1 if white to play
             int direction = 1 - 2 * (int)board.ColorToPlay;
 
-            int distance = (EndSquare.Row - StartSquare.Row)*direction;
+            int distance = (ToSquare.Row - FromSquare.Row) * direction;
             //Console.WriteLine("DEBUG: ColorToPlay={0}  direction={1}", board.ColorToPlay, direction);
             //Console.WriteLine("DEBUG: end={0}  start={1}  distance={2}", EndSquare.Row, StartSquare.Row, distance);
 
-            if( distance < 0)
+            if (distance < 0)
             {
                 //Console.WriteLine("BAD: {0} --> {1} is going the wrong way", StartSquare, EndSquare);
                 return false;
@@ -636,10 +659,10 @@ namespace ChessEngine001
             }
 
 
-            if ( distance == 1 )
+            if (distance == 1)
             {
                 //Console.WriteLine("DEBUG: Moving one square", board.ColorToPlay, direction);
-                if (board[EndSquare].Type == Type.Empty)
+                if (board[ToSquare].Type == Type.Empty)
                 {
                     //Console.WriteLine("GOOD: Destination square is empty");
                     //Console.WriteLine("GOOD: MOVE IS PSEUDOLEGAL");
@@ -660,7 +683,7 @@ namespace ChessEngine001
                 // 1 or 6
                 int validStartRow;
 
-                if( board.ColorToPlay == Color.White)
+                if (board.ColorToPlay == Color.White)
                 {
                     validStartRow = 1;
                 }
@@ -669,7 +692,7 @@ namespace ChessEngine001
                     validStartRow = 6;
                 }
 
-                if( StartSquare.Row != validStartRow)
+                if (FromSquare.Row != validStartRow)
                 {
                     //Console.WriteLine("BAD: {0} is not on the correct row. Its row is {1}. The valid row with {2} to play is {3}",StartSquare, StartSquare.Row, board.ColorToPlay, validStartRow);
                     return false;
@@ -679,16 +702,16 @@ namespace ChessEngine001
                     //Console.WriteLine("GOOD: {0} is on the correct row. Its row is {1}. The valid row with {2} to play is {3}", StartSquare, StartSquare.Row, board.ColorToPlay, validStartRow);
                 }
 
-                Coord midPoint = new Coord( StartSquare.Row + direction, StartSquare.Col );
+                Coord midPoint = new Coord(FromSquare.Row + direction, FromSquare.Col);
                 //Console.WriteLine("DEBUG: Midpoint is {0}", midPoint);
 
-                if (board[EndSquare].Type == Type.Empty && board[midPoint].Type == Type.Empty)
+                if (board[ToSquare].Type == Type.Empty && board[midPoint].Type == Type.Empty)
                 {
                     //Console.WriteLine("GOOD: {0} and {1} are both empty.", midPoint, EndSquare);
                     //Console.WriteLine("GOOD: MOVE IS PSEUDOLEGAL.");
 
                     // Set en passant target
-                    enPassantTarget = midPoint;
+                    resultingEnPassantTarget = midPoint;
                     return true;
                 }
                 else
@@ -737,7 +760,7 @@ namespace ChessEngine001
             bool movesDiagonal = false;
             bool movesStraight = false;
 
-            if( type == Type.Bishop || type == Type.Queen || type == Type.King)
+            if (type == Type.Bishop || type == Type.Queen || type == Type.King)
             {
                 movesDiagonal = true;
             }
@@ -745,32 +768,32 @@ namespace ChessEngine001
             {
                 movesStraight = true;
             }
-            if( type == Type.King)
+            if (type == Type.King)
             {
                 limitedDistance = true;
             }
 
             // Start is of Type type
-            if( board[StartSquare].Type != type)
+            if (board[FromSquare].Type != type)
             {
                 return false;
             }
 
             // Can't start and end on same square
-            if( StartSquare == EndSquare )
+            if (FromSquare == ToSquare)
             {
                 return false;
             }
 
             // Start is of correct color
-            if (board[StartSquare].Color != board.ColorToPlay)
+            if (board[FromSquare].Color != board.ColorToPlay)
             {
                 return false;
             }
 
             // Figure out if axis exists and if it's valid
-            int rowsAhead = (EndSquare.Row - StartSquare.Row);
-            int colsAhead = (EndSquare.Col - StartSquare.Col);
+            int rowsAhead = (ToSquare.Row - FromSquare.Row);
+            int colsAhead = (ToSquare.Col - FromSquare.Col);
 
             // Will be either 0 or 1
             int rowDirection;
@@ -778,9 +801,9 @@ namespace ChessEngine001
             string axis;
 
             // Vertical
-            if( colsAhead == 0)
+            if (colsAhead == 0)
             {
-                if( !movesStraight )
+                if (!movesStraight)
                 {
                     return false;
                 }
@@ -793,7 +816,7 @@ namespace ChessEngine001
             }
 
             // Horizontal
-            else if( rowsAhead == 0)
+            else if (rowsAhead == 0)
             {
                 if (!movesStraight)
                 {
@@ -806,11 +829,11 @@ namespace ChessEngine001
                     colDirection = 1;
                 else
                     colDirection = -1;
-                
+
             }
 
             // Slope = +1 ==> northeast
-            else if( rowsAhead == colsAhead )
+            else if (rowsAhead == colsAhead)
             {
                 if (!movesDiagonal)
                 {
@@ -830,7 +853,7 @@ namespace ChessEngine001
             }
 
             // Slope = -1 ==> northeast
-            else if ( rowsAhead == - colsAhead)
+            else if (rowsAhead == -colsAhead)
             {
                 if (!movesDiagonal)
                 {
@@ -857,7 +880,7 @@ namespace ChessEngine001
             }
 
             // Check king distance
-            if( limitedDistance && ( colsAhead > 1 || colsAhead < -1 || rowsAhead >1 || rowsAhead < -1 ))
+            if (limitedDistance && (colsAhead > 1 || colsAhead < -1 || rowsAhead > 1 || rowsAhead < -1))
             {
                 return false;
             }
@@ -865,10 +888,10 @@ namespace ChessEngine001
 
             // Iterate along direction until the end square
             // All intermediate squares should be empty
-            Coord currentCoord = new Coord(StartSquare.Row + rowDirection, StartSquare.Col + colDirection);
-            while( currentCoord != EndSquare )
+            Coord currentCoord = new Coord(FromSquare.Row + rowDirection, FromSquare.Col + colDirection);
+            while (currentCoord != ToSquare)
             {
-                if( board[currentCoord].Type != Type.Empty)
+                if (board[currentCoord].Type != Type.Empty)
                 {
                     return false;
                 }
@@ -879,11 +902,11 @@ namespace ChessEngine001
             // Check end square
 
             // If end square is empty, move is good.
-            if (board[EndSquare].Type == Type.Empty)
+            if (board[ToSquare].Type == Type.Empty)
                 return true;
 
             // If end square is occupied and opposite color, it's good (a capture)
-            else if(board[EndSquare].Color != board.ColorToPlay)
+            else if (board[ToSquare].Color != board.ColorToPlay)
             {
                 return true;
             }

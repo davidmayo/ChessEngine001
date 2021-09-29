@@ -221,12 +221,12 @@ namespace ChessEngine001
         {
 
             // If the king moves, set the castling rights to false
-            if (this[move.StartSquare].Type == Type.King && ColorToPlay == Color.White)
+            if (this[move.FromSquare].Type == Type.King && ColorToPlay == Color.White)
             {
                 CanCastleKingsideWhite = false;
                 CanCastleQueensideWhite = false;
             }
-            else if (this[move.StartSquare].Type == Type.King && ColorToPlay == Color.Black)
+            else if (this[move.FromSquare].Type == Type.King && ColorToPlay == Color.Black)
             {
                 CanCastleKingsideBlack = false;
                 CanCastleQueensideBlack = false;
@@ -234,26 +234,26 @@ namespace ChessEngine001
 
             // If A8, H8, A1, or A8 are start position for this move, then the rook has moved
             // and that castle is now forever illegal
-            if (move.StartSquare == "a1")
+            if (move.FromSquare == "a1")
             {
                 CanCastleQueensideWhite = false;
             }
-            else if (move.StartSquare == "a8")
+            else if (move.FromSquare == "a8")
             {
                 CanCastleKingsideWhite = false;
             }
-            else if (move.StartSquare == "h1")
+            else if (move.FromSquare == "h1")
             {
                 CanCastleQueensideBlack = false;
             }
-            else if (move.StartSquare == "h8")
+            else if (move.FromSquare == "h8")
             {
                 CanCastleKingsideBlack = false;
             }
 
             // Move the piece
-            this[move.EndSquare] = this[move.StartSquare];
-            this[move.StartSquare] = new Piece('-');
+            this[move.ToSquare] = this[move.FromSquare];
+            this[move.FromSquare] = new Piece('-');
 
             // Swap color to play
             ColorToPlay = 1 - ColorToPlay;

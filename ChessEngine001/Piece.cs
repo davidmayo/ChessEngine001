@@ -36,6 +36,12 @@ namespace ChessEngine001
             color = color.Trim().ToLower();
         }*/
 
+        public Piece(Type type, Color color = Color.White)
+        {
+            this.Type = type;
+            this.Color = color;
+        }
+
         public Piece( char fenChar)
         {
             switch( fenChar.ToString().ToLower() )
