@@ -1,0 +1,7 @@
+status,id,description
+TODO,001,Add IsCapture() to Move class
+TODO,002,Add IsCheck() to Move class
+TODO,003,Create MoveGenerator class
+TODO,004,Add support for UCI-style strings in Move constructor
+TODO,005,Add support for pawn promotion
+TODO,006,Add IsLegal() method to Move class [major hassle]
