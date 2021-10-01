@@ -1,9 +1,9 @@
 status,id,description
-IN PROGRESS,001,Add IsCapture() to Move class
+CLOSED,001,Add IsCapture() to Move class
 TODO,002,Add IsCheck() to Move class
 TODO,003,Create MoveGenerator class
 CLOSED,004,Add support for UCI-style strings in Move constructor
-TODO,005,Add support for pawn promotion
+IN PROGRESS,005,Add support for pawn promotion
 TODO,006,Add IsLegal() method to Move class [major hassle]
 IN PROGRESS,007,Generate standard notation for moves e8=Q Ra8 Nh3+ O-O-O cxd5# etc
 TODO,008,Move constructor from standard notation for moves e8=Q Ra8 Nh3+ O-O-O cxd5# etc
@@ -12,4 +12,4 @@ TODO,010,Clean up the board string text on right
 TODO,011,Re-implement MakeMove() in Board class
 TODO,012,refactor Move class into Move and ValidateMove
 TODO,013,Create a class Game [or similar] to make sequences of moves
-TODO,014,IsPseudoLegalMove() is doing too much. Refactor/replace with something like EvaluateMove();
+MOSTLY DONE,014,IsPseudoLegalMove() is doing too much. Refactor/replace with something like EvaluateMove();
