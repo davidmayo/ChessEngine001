@@ -11,8 +11,6 @@ namespace ChessEngine001
         public int Col{ get; }
         public int Index { get; }
 
-        public static readonly Coord Unknown;
-
         //public Coord Unknown = new Coord(-1);
         public Coord()
         {
@@ -102,8 +100,8 @@ namespace ChessEngine001
 
         public static bool operator ==(Coord left, Coord right)
         {
-            if ((object)left == null)
-                return (object)right == null;
+            if (left is null)
+                return right is null;
 
             return left.Equals(right);
         }

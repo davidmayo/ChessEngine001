@@ -44,35 +44,18 @@ namespace ChessEngine001
 
         public Piece( char fenChar)
         {
-            switch( fenChar.ToString().ToLower() )
+            Type = (fenChar.ToString().ToLower()) switch
             {
-                case "p":
-                    Type = Type.Pawn;
-                    break;
-                case "n":
-                    Type = Type.Knight;
-                    break;
-                case "b":
-                    Type = Type.Bishop;
-                    break;
-                case "r":
-                    Type = Type.Rook;
-                    break;
-                case "q":
-                    Type = Type.Queen;
-                    break;
-                case "k":
-                    Type = Type.King;
-                    break;
-                case "-":
-                    Type = Type.Empty;
-                    break;
-                default:
-                    Type = Type.Unknown;
-                    break;
-            }
-
-            if( char.IsLetter(fenChar) && char.IsUpper(fenChar))
+                "p" => Type.Pawn,
+                "n" => Type.Knight,
+                "b" => Type.Bishop,
+                "r" => Type.Rook,
+                "q" => Type.Queen,
+                "k" => Type.King,
+                "-" => Type.Empty,
+                _   => Type.Unknown,
+            };
+            if ( char.IsLetter(fenChar) && char.IsUpper(fenChar))
             {
                 Color = Color.White;
             }
@@ -91,40 +74,19 @@ namespace ChessEngine001
 
         public string ToFenString()
         {
-            string rv;
-            
-            switch( Type )
+            string rv = Type switch
             {
-                case Type.Pawn:
-                    rv = "p";
-                    break;
-                case Type.Knight:
-                    rv = "n";
-                    break;
-                case Type.Bishop:
-                    rv = "b";
-                    break;
-                case Type.Rook:
-                    rv = "r";
-                    break;
-                case Type.Queen:
-                    rv = "q";
-                    break;
-                case Type.King:
-                    rv = "k";
-                    break;
-                case Type.Empty:
-                    rv = "-";
-                    break;
-                case Type.Unknown:
-                    rv = "?";
-                    break;
-                default:
-                    rv = "-";
-                    break;
-            }
-
-            if( Color == Color.White)
+                Type.Pawn => "p",
+                Type.Knight => "n",
+                Type.Bishop => "b",
+                Type.Rook => "r",
+                Type.Queen => "q",
+                Type.King => "k",
+                Type.Empty => "-",
+                Type.Unknown => "?",
+                _ => "-",
+            };
+            if ( Color == Color.White)
             {
                 return rv.ToUpper();
             }

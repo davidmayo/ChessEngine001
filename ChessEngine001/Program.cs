@@ -4,7 +4,7 @@ namespace ChessEngine001
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             // Make a change again
             Board board;

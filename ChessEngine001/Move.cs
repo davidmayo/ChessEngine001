@@ -690,31 +690,15 @@ namespace ChessEngine001
             this.PieceToMove = this.board[FromSquare];
 
             resultingEnPassantTarget = null;
-
-            Type pieceType;
-
-            switch (promotionString.ToLower())
+            var pieceType = (promotionString.ToLower()) switch
             {
-                case "":
-                    pieceType = Type.Unknown;
-                    break;
-                case "q":
-                    pieceType = Type.Queen;
-                    break;
-                case "n":
-                    pieceType = Type.Knight;
-                    break;
-                case "r":
-                    pieceType = Type.Rook;
-                    break;
-                case "b":
-                    pieceType = Type.Bishop;
-                    break;
-                default:
-                    pieceType = Type.Unknown;
-                    break;
-            }
-
+                "" => Type.Unknown,
+                "q" => Type.Queen,
+                "n" => Type.Knight,
+                "r" => Type.Rook,
+                "b" => Type.Bishop,
+                _ => Type.Unknown,
+            };
             pawnPromotionType = pieceType;
 
             // TODO: Refactor this to be something like EvaluateMove();
