@@ -19,13 +19,29 @@ namespace ChessEngine001
 
             string specialMoves = "r3k2r/6P1/8/Pp6/8/8/8/R3K2R w KQkq b6 0 3";
             
-            board = new Board(specialMoves);
+            board = new Board(startPositionFen);
             //board.ColorToPlay = Color.Black;
+
+            string input;
+            Move move;
+
+            while(true)
+            {
+                Console.Clear();
+                board.PrintBoard();
+                Console.Write("\n\nEnter a move in UCI notation (e2e4): ");
+
+                input = Console.ReadLine();
+
+                move = new Move(input, board);
+
+                board.MakeMove(move);
+            }
 
 
             board.PrintBoard();
 
-            Move move;
+            //Move move;
 
 
             //return;
@@ -64,7 +80,10 @@ namespace ChessEngine001
                         if (move.IsCapture)
                             Console.Write("   capture");
                         if (move.IsCastle)
+                        {
                             Console.Write("   castle");
+                            Console.Write(" [rook from {0} to {1}]",move.RookCastlingFrom, move.RookCastlingTo);
+                        }
                         if (move.IsCheck())
                             Console.Write("   check");
                         if (move.IsPawnPromotion)

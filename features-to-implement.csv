@@ -9,7 +9,7 @@ IN PROGRESS,007,Generate standard notation for moves e8=Q Ra8 Nh3+ O-O-O cxd5# e
 TODO,008,Move constructor from standard notation for moves e8=Q Ra8 Nh3+ O-O-O cxd5# etc
 CLOSED,009,Add ToUciMoveString() method to Move class
 TODO,010,Clean up the board string text on right
-TODO,011,Re-implement MakeMove() in Board class
+CLOSED,011,Re-implement MakeMove() in Board class
 TODO,012,refactor Move class into Move and ValidateMove
 TODO,013,Create a class Game [or similar] to make sequences of moves
 CLOSED,014,IsPseudoLegalMove() is doing too much. Refactor/replace with something like EvaluateMove();

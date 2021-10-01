@@ -33,7 +33,9 @@ namespace ChessEngine001
         public bool IsCastle { get => isCastle; }
         public bool IsPawnPromotion { get => isPawnPromotion; }
         public bool IsEnPassantCapture { get => isEnPassantCapture; }
-
+        internal Color SideMoving { get => sideMoving; }
+        internal Coord RookCastlingFrom { get => rookCastlingFrom; }
+        internal Coord RookCastlingTo { get => rookCastlingTo; }
 
         private Coord resultingEnPassantTarget;
 
@@ -50,6 +52,10 @@ namespace ChessEngine001
         private bool isPawnPromotion;
         private bool isEnPassantCapture;
         private bool isCastle;
+        private Color sideMoving;
+        private Coord rookCastlingFrom;
+        private Coord rookCastlingTo;
+
 
         private void EvaluateMove()
         {
@@ -371,11 +377,18 @@ namespace ChessEngine001
             isCastle = true;
             isPseudoLegal = true;
             isLegal = true;
-            if( isQueenside)
+            if (isQueenside)
+            {
+                rookCastlingFrom = new Coord(FromSquare.Row, 0);
+                rookCastlingTo   = new Coord(FromSquare.Row, ToSquare.Col + 1);
                 moveString = string.Format("[{0}-{1}] O-O-O", FromSquare, ToSquare);
+            }
             else
+            {
+                rookCastlingFrom = new Coord(FromSquare.Row, 7);
+                rookCastlingTo = new Coord(FromSquare.Row, ToSquare.Col - 1);
                 moveString = string.Format("[{0}-{1}] O-O", FromSquare, ToSquare);
-
+            }
             //return true;
             //throw new NotImplementedException();
         }
@@ -537,6 +550,7 @@ namespace ChessEngine001
 
             isCapture = true;
             isEnPassantCapture = true;
+
             
             isLegal = true;
             isPseudoLegal = true;
@@ -650,8 +664,10 @@ namespace ChessEngine001
             FromSquare = start;
             ToSquare = end;
             this.board = board;
+            
 
             this.PieceToMove = this.board[FromSquare];
+            sideMoving = PieceToMove.Color;
             pawnPromotionType = pawnPromotionTarget;
 
             // TODO: Refactor this to be something like EvaluateMove();

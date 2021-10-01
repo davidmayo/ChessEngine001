@@ -219,41 +219,94 @@ namespace ChessEngine001
 
         public void MakeMove(Move move)
         {
-
-            // If the king moves, set the castling rights to false
-            if (this[move.FromSquare].Type == Type.King && ColorToPlay == Color.White)
+            if (!move.IsLegal)
             {
-                CanCastleKingsideWhite = false;
-                CanCastleQueensideWhite = false;
-            }
-            else if (this[move.FromSquare].Type == Type.King && ColorToPlay == Color.Black)
-            {
-                CanCastleKingsideBlack = false;
-                CanCastleQueensideBlack = false;
+                return;
             }
 
-            // If A8, H8, A1, or A8 are start position for this move, then the rook has moved
-            // and that castle is now forever illegal
-            if (move.FromSquare == "a1")
+            Color sideMoving = move.SideMoving;
+
+            Coord fromCoord = move.FromSquare;
+            Coord toCoord = move.ToSquare;
+
+            Piece piece = move.PieceToMove;
+
+            // Castling is special:
+            if ( move.IsCastle)
             {
+                // Move the king
+                this[toCoord]   = piece;
+                this[fromCoord] = new Piece(Type.Empty, sideMoving);
+
+                // Move the rook
+                this[move.RookCastlingTo] = this[move.RookCastlingFrom];
+                this[move.RookCastlingFrom] = new Piece(Type.Empty, sideMoving);
+
+                // Revoke castling rights.
+                if (sideMoving == Color.White)
+                {
+                    CanCastleKingsideWhite = false;
+                    CanCastleQueensideWhite = false;
+                }
+                else
+                {
+                    CanCastleKingsideBlack = false;
+                    CanCastleQueensideBlack = false;
+                }
+            } // castling
+
+            else if( move.IsEnPassantCapture)
+            {
+                // Move FROM to TO
+                this[toCoord] = piece;
+
+                // Remove FROM from board
+                this[fromCoord] = new Piece(Type.Empty,sideMoving);
+
+                // Remove en passant from board
+                Coord capturedCoord = new Coord(fromCoord.Row, toCoord.Col);
+                this[capturedCoord] = new Piece(Type.Empty, sideMoving); 
+            } // en passant
+
+            else if( move.IsPawnPromotion )
+            {
+                ;
+            } // Pawn promotion
+
+            // Normal move
+            else
+            {
+                ;
+            }
+
+            // If the king is moving, castling is forever illegal.
+            if( move.PieceToMove.Type == Type.King )
+            {
+                if( sideMoving == Color.White )
+                {
+                    CanCastleKingsideWhite = false;
+                    CanCastleQueensideWhite = false;
+                }
+                else
+                {
+                    CanCastleKingsideBlack = false;
+                    CanCastleQueensideBlack = false;
+                }
+            }
+
+            // If the From or To are in the corners, castling that way is forever illegal
+            if (move.FromSquare == "a1" || move.ToSquare == "a1")
                 CanCastleQueensideWhite = false;
-            }
-            else if (move.FromSquare == "a8")
-            {
+            if (move.FromSquare == "h1" || move.ToSquare == "h1")
                 CanCastleKingsideWhite = false;
-            }
-            else if (move.FromSquare == "h1")
-            {
+            if (move.FromSquare == "a8" || move.ToSquare == "a8")
                 CanCastleQueensideBlack = false;
-            }
-            else if (move.FromSquare == "h8")
-            {
+            if (move.FromSquare == "h8" || move.ToSquare == "h8")
                 CanCastleKingsideBlack = false;
-            }
 
             // Move the piece
-            this[move.ToSquare] = this[move.FromSquare];
-            this[move.FromSquare] = new Piece('-');
+            this[toCoord] = piece;
+            this[fromCoord] = new Piece(Type.Empty,sideMoving);
 
             // Swap color to play
             ColorToPlay = 1 - ColorToPlay;
@@ -262,8 +315,7 @@ namespace ChessEngine001
             MostRecentMove = move;
 
             // Set en passant square
-            //EnPassantTarget = move.EnPassantTarget;
-
+            EnPassantTarget = move.ResultingEnPassantTarget;
         }
 
         public string ToFenString()
