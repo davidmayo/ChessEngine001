@@ -270,7 +270,9 @@ namespace ChessEngine001
 
             else if( move.IsPawnPromotion )
             {
-                ;
+                // Set moving piece to be the promotion piece
+                // Then it will all get figured out later.
+                piece = move.PawnPromotionType;
             } // Pawn promotion
 
             // Normal move

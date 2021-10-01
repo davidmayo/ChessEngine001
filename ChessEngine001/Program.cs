@@ -6,6 +6,9 @@ namespace ChessEngine001
     {
         static void Main()
         {
+            Game game = new Game();
+
+            return;
             // Make a change again
             Board board;
             string testPositionFen  = "rnbNk1nr/1pppp3/8/8/pbq5/1P2Rppp/P1PPPPPP/RNBQKBN1 w KQkq - 5 40";
