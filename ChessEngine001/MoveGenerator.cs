@@ -4,8 +4,54 @@ using System.Text;
 
 namespace ChessEngine001
 {
-    class MoveValidator
+    class MoveGenerator
     {
+        private Coord heroKingCoord;
+        private Coord villainKingCoord;
+        private Color heroColor;
+        private Color villainColor;
+        private Board board;
+        private List<Coord> heroOccupiedSquares;
+        private List<Coord> villainOccupiedSquares;
+        private List<Coord> attackedSquares;
+        private List<Move> legalMoves;
+        private List<Coord> allSquares;
+
+
+        MoveGenerator(Board board)
+        {
+            this.board = board;
+            this.heroColor    = this.board.ColorToPlay;
+            this.villainColor = 1 - heroColor;
+
+            // Generate all Coords
+            allSquares = board.GetAllSquares();
+
+            // Locate the kings
+            FindKings();
+
+            // Locate hero and villain pieces
+            heroOccupiedSquares    = FindPieces( heroColor );
+            villainOccupiedSquares = FindPieces( villainColor );
+
+        }
+
+
+        private List<Coord> FindPieces(Color villainColor)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void FindKings()
+        {
+            heroKingCoord = null;
+            villainKingCoord = null;
+
+
+
+            throw new NotImplementedException();
+        }
+
         public static bool[,] GetAttackedSquares(Board board)
         {
             Color colorToPlay = board.ColorToPlay;
@@ -30,21 +76,6 @@ namespace ChessEngine001
             }
 
             return result;
-        }
-        public static List<Coord> ReachableBy(Coord coord, Piece piece)
-        {
-            return ReachableBy(coord, piece.Type, piece.Color);
-        }
-        public static List<Coord> ReachableBy(Coord coord, Type type, Color color)
-        {
-            if (type == Type.Knight)
-                return ReachableByKnight(coord);
-            else if( type == Type.Pawn)
-            {
-                return new List<Coord>();
-            }
-            else
-                return ReachableBySlidingPiece(coord, type);
         }
 
         public static List<Coord> SquaresAttackedBy(Coord coord, Board board)
@@ -218,78 +249,5 @@ namespace ChessEngine001
             }
             return attackedSquares;
         }
-
-        private static List<Coord> ReachableBySlidingPiece(Coord startCoord, Type type)
-        {
-            bool shortDistancePiece = (type == Type.King);
-            List<Coord> targetedCoords = new List<Coord>();
-            List<CoordOffset> directions = new List<CoordOffset>();
-
-            // Horizontal/vertical
-            if( type == Type.Queen || type == Type.Rook || type == Type.King)
-            {
-                directions.Add(new CoordOffset(0, -1));
-                directions.Add(new CoordOffset(0, 1));
-                directions.Add(new CoordOffset(1, 0));
-                directions.Add(new CoordOffset(-1, 0));
-            }
-
-            // Diagonal
-            if (type == Type.Queen || type == Type.Bishop || type == Type.King)
-            {
-                directions.Add(new CoordOffset( 1, 1));
-                directions.Add(new CoordOffset( 1,-1));
-                directions.Add(new CoordOffset(-1, 1));
-                directions.Add(new CoordOffset(-1,-1));
-            }
-
-            foreach( var direction in directions)
-            {
-                Coord targetCoord = startCoord;
-
-                while( !(targetCoord is null))
-                {
-                    targetCoord += direction;
-
-                    if (!(targetCoord is null))
-                        targetedCoords.Add(targetCoord);
-
-                    // If it's the king, only go one square any any direction
-                    if (shortDistancePiece)
-                        break;
-                }
-            }
-            return targetedCoords;
-        }
-
-
-
-        private static List<Coord> ReachableByKnight(Coord startCoord)
-        {
-            List<Coord> targetedCoords = new List<Coord>();
-            List<CoordOffset> offsets = new List<CoordOffset>();
-
-            offsets.Add(new CoordOffset(2, 1));
-            offsets.Add(new CoordOffset(2, -1));
-            offsets.Add(new CoordOffset(-2, 1));
-            offsets.Add(new CoordOffset(-2, -1));
-            offsets.Add(new CoordOffset(1, 2));
-            offsets.Add(new CoordOffset(1, -2));
-            offsets.Add(new CoordOffset(-1, 2));
-            offsets.Add(new CoordOffset(-1, -2));
-
-            foreach (var offset in offsets)
-            {
-                Coord targetCoord = startCoord + offset;
-
-                if( !(targetCoord is null))
-                {
-                    targetedCoords.Add(targetCoord);
-                }
-            }
-            return targetedCoords;
-        }
-
-
     }
 }

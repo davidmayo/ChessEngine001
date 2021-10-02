@@ -9,9 +9,10 @@ namespace ChessEngine001
             Board board = new Board("k7/pp6/3n4/8/3rQ3/4KPq1/5B2/7N w - - 0 1");
             board = new Board("8/8/8/8/8/1K4B1/8/8 w - - 0 1");
             board = new Board();
+            board.ColorToPlay = Color.Black;
             board.PrintBoard();
 
-            var attacked = MoveValidator.GetAttackedSquares(board);
+            var attacked = MoveGenerator.GetAttackedSquares(board);
 
             for( int row = 7; row >= 0; row--)
             {
