@@ -7,33 +7,27 @@ namespace ChessEngine001
         static void Main()
         {
             Board board = new Board("k7/pp6/3n4/8/3rQ3/4KPq1/5B2/7N w - - 0 1");
-            board = new Board("8/8/8/8/8/1K4B1/8/8 w - - 0 1");
+            board = new Board("k7/8/8/8/8/1K4B1/8/8 w - - 0 1");
             board = new Board();
-            board.ColorToPlay = Color.Black;
+            board.MakeMove(new Move("a2a4",board));
+            board.MakeMove(new Move("b7b5",board));
+            board = new Board("3n1n2/k3P3/8/8/8/8/K7/8 w - - 0 1");
+            //board.ColorToPlay = Color.Black;
             board.PrintBoard();
 
-            var attacked = MoveGenerator.GetAttackedSquares(board);
+            MoveGenerator mg = new MoveGenerator(board);
 
-            for( int row = 7; row >= 0; row--)
+            var moves = mg.LegalMoves;
+
+            foreach( var move in moves )
             {
-                for( int col = 0; col < 8; col++)
-                {
-                    if (attacked[row, col])
-                        Console.Write(" X ");
-                    else
-                        Console.Write(" - ");
-                }
-                Console.WriteLine();
+                Console.WriteLine(move);
             }
-            return;
+
             //var attacked = MoveValidator.SquaresAttackedBy("b7",board);
 
             int count = 0;
-            foreach( var square in attacked )
-            {
-                count++;
-                Console.WriteLine("{0,3}. {1}",count,square);
-            }
+            
 
 
             string testPositionFen  = "rnbNk1nr/1pppp3/8/8/pbq5/1P2Rppp/P1PPPPPP/RNBQKBN1 w KQkq - 5 40";

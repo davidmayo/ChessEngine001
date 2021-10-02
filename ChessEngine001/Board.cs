@@ -217,18 +217,6 @@ namespace ChessEngine001
             }
         }
 
-        public List<Coord> GetAllSquares()
-        {
-            List<Coord> allSquares = new List<Coord>(64);
-            for (int row = 0; row < 8; row++)
-            {
-                for (int col = 0; col < 8; col++)
-                {
-                    allSquares.Add(new Coord(row, col));
-                }
-            }
-            return allSquares;
-        }
 
         public void MakeMove(Move move)
         {
