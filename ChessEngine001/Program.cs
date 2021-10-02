@@ -6,11 +6,35 @@ namespace ChessEngine001
     {
         static void Main()
         {
-            Game game = new Game();
+            Board board = new Board("k7/pp6/3n4/8/3rQ3/4KPq1/5B2/7N w - - 0 1");
+            board = new Board("8/8/8/8/8/1K4B1/8/8 w - - 0 1");
+            board = new Board();
+            board.PrintBoard();
 
+            var attacked = MoveValidator.GetAttackedSquares(board);
+
+            for( int row = 7; row >= 0; row--)
+            {
+                for( int col = 0; col < 8; col++)
+                {
+                    if (attacked[row, col])
+                        Console.Write(" X ");
+                    else
+                        Console.Write(" - ");
+                }
+                Console.WriteLine();
+            }
             return;
-            // Make a change again
-            Board board;
+            //var attacked = MoveValidator.SquaresAttackedBy("b7",board);
+
+            int count = 0;
+            foreach( var square in attacked )
+            {
+                count++;
+                Console.WriteLine("{0,3}. {1}",count,square);
+            }
+
+
             string testPositionFen  = "rnbNk1nr/1pppp3/8/8/pbq5/1P2Rppp/P1PPPPPP/RNBQKBN1 w KQkq - 5 40";
             string startPositionFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
             string castlePositionFen = "r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1";
@@ -21,85 +45,6 @@ namespace ChessEngine001
             string capturePositionFen = "k7/4B3/2Kb4/2P5/2NR1Q2/8/8/8 w - - 0 1";
 
             string specialMoves = "r3k2r/6P1/8/Pp6/8/8/8/R3K2R w KQkq b6 0 3";
-            
-            board = new Board(startPositionFen);
-            //board.ColorToPlay = Color.Black;
-
-            string input;
-            Move move;
-
-            while(true)
-            {
-                Console.Clear();
-                board.PrintBoard();
-                Console.Write("\n\nEnter a move in UCI notation (e2e4): ");
-
-                input = Console.ReadLine();
-
-                move = new Move(input, board);
-
-                board.MakeMove(move);
-            }
-
-
-            board.PrintBoard();
-
-            //Move move;
-
-
-            //return;
-            int count = 0;
-            for( int start = 0; start < 64; start++)
-            {
-                for( int end = 0; end < 64; end++ )
-                {
-                    move = new Move(new Coord(start), new Coord(end), board);
-                    if (move.IsLegal)
-                    {
-                        if (move.IsPawnPromotion)
-                        {
-                            foreach (var type in new Type[] { Type.Queen, Type.Rook, Type.Bishop, Type.Knight})
-                            {
-                                move= new Move(new Coord(start), new Coord(end), board, type);
-                                Console.Write("[pseudo-legal] {0,5}: {1}", count, move);
-
-                                if (move.IsCapture)
-                                    Console.Write("   capture");
-                                if (move.IsCastle)
-                                    Console.Write("   castle");
-                                if (move.IsCheck())
-                                    Console.Write("   check");
-                                if (move.IsPawnPromotion)
-                                    Console.Write("   pawn promotion");
-                                if (move.IsEnPassantCapture)
-                                    Console.Write("   en passant");
-                                Console.WriteLine();
-                                count++;
-                            }
-                            continue;
-                        }
-                        count++;
-                        Console.Write("[pseudo-legal] {0,5}: {1}", count, move);
-                        if (move.IsCapture)
-                            Console.Write("   capture");
-                        if (move.IsCastle)
-                        {
-                            Console.Write("   castle");
-                            Console.Write(" [rook from {0} to {1}]",move.RookCastlingFrom, move.RookCastlingTo);
-                        }
-                        if (move.IsCheck())
-                            Console.Write("   check");
-                        if (move.IsPawnPromotion)
-                            Console.Write("   pawn promotion");
-                        if (move.IsEnPassantCapture)
-                            Console.Write("   en passant");
-                        Console.WriteLine();
-                    }
-                }
-            }
-
-            Move newMove = new Move("c5d6", board);
-            ;
             
         } // Main()
     }

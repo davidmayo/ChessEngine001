@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ChessEngine001
 {
-    class Coord : IEquatable<Coord>
+    public class Coord : IEquatable<Coord>
     {
         public int Row{get;}
         public int Col{ get; }
